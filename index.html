@@ -4,14 +4,17 @@
 <meta charset="UTF-8">
 <title>Sony Style Unified Player</title>
 
-<link href="https://fonts.cdnfonts.com/css/digital-7-mono" rel="stylesheet">
-
-<link rel="preload" href="backgrounds/bg_day1.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="backgrounds/bg_day2.jpg" as="image" fetchpriority="high">
+<link rel="preload" href="backgrounds/bg_day1.png" as="image" fetchpriority="high">
+<link rel="preload" href="backgrounds/bg_day2.png" as="image" fetchpriority="high">
 <link rel="preload" href="backgrounds/bg_day3.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="backgrounds/bg_night1.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="backgrounds/bg_night2.jpg" as="image" fetchpriority="high">
-<link rel="preload" href="backgrounds/bg_night3.jpg" as="image" fetchpriority="high">
+<link rel="preload" href="backgrounds/bg_day4.png" as="image" fetchpriority="high">
+<link rel="preload" href="backgrounds/bg_day5.png" as="image" fetchpriority="high">
+<link rel="preload" href="backgrounds/bg_day6.png" as="image" fetchpriority="high">
+
+<link rel="preload" href="backgrounds/bg_night1.png" as="image" fetchpriority="high">
+<link rel="preload" href="backgrounds/bg_night2.png" as="image" fetchpriority="high">
+<link rel="preload" href="backgrounds/bg_night3.png" as="image" fetchpriority="high">
+
 
 <style>
 :root {
@@ -679,6 +682,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentMode = null;
     let isPlaying = false;
     let currentRadioIndex = 0;
+    let skipCooldown = false;
+
 
 
 
@@ -990,6 +995,12 @@ document.addEventListener("DOMContentLoaded", function () {
 { name: "Andy Shauf - Jenny Come Home.mp3", url: "Songs 2/Andy Shauf - Jenny Come Home.mp3" },
 { name: "Ant  Dec - Falling.mp3", url: "Songs 2/Ant  Dec - Falling.mp3" },
 { name: "Armand Van Helden - I Want Your Soul.mp3", url: "Songs 2/Armand Van Helden - I Want Your Soul.mp3" },
+{ name: "Pitbull - Free Free Free.mp3", url: "mymp3player1/Songs 2/Pitbull - Free Free Free.mp3" },
+{ name: "Tommie Jenkins - Never Too Late.mp3", url: "mymp3player1/Songs 2/Tommie Jenkins - Never Too Late.mp3" },
+{ name: "Tori Kelly - Something Beautiful.mp3", url: "mymp3player1/Songs 2/Tori Kelly - Something Beautiful.mp3" },
+{ name: "Whigfield - Another Day.mp3", url: "mymp3player1/Songs 2/Whigfield - Another Day.mp3" },
+{ name: "MNEK - Colour.mp3", url: "mymp3player1/Songs 2/MNEK - Colour.mp3" },
+{ name: "Thomas Helmig - Love Is A Miracle.mp3", url: "mymp3player1/Songs 2/Thomas Helmig - Love Is A Miracle.mp3" },
 { name: "Ashford and Simpson - Solid.mp3", url: "Songs 2/Ashford and Simpson - Solid.mp3" },
 { name: "Atomic Kitten - Follow Me.mp3", url: "Songs 2/Atomic Kitten - Follow Me.mp3" },
 { name: "Atomic Kitten - The Tide Is High (Get The Feeling) (Groove Brother Edit).mp3", url: "Songs 2/Atomic Kitten - The Tide Is High (Get The Feeling) (Groove Brother Edit).mp3" },
@@ -1475,14 +1486,24 @@ const radioItems = [
     { name: "Fresh Radio", url: "https://s36.radiolize.com/radio/8170/radio.mp3" }
 ];
 
-    /* SHUFFLE ENGINE */
-const shuffleState = {
+/* ===========================
+       SHUFFLE ENGINE
+       =========================== */
+
+    const shuffleState = {
         mp3_1: { order: [], index: 0 },
         mp3_2: { order: [], index: 0 }
     };
 
     function getShuffleKey(mode) {
         return mode === MODE_MP3_1 ? "mp3_1" : "mp3_2";
+    }
+
+    function startSkipCooldown(seconds) {
+        skipCooldown = true;
+        setTimeout(() => {
+            skipCooldown = false;
+        }, seconds * 1000);
     }
 
     function buildShuffleOrder(length) {
@@ -1517,28 +1538,26 @@ const shuffleState = {
         }
     }
 
-   function updateMp3Title(filename) {
-    // ⭐ Ensure filename is a string
-    if (typeof filename !== "string") {
-        console.warn("Invalid filename passed to updateMp3Title:", filename);
+    function updateMp3Title(filename) {
+        if (typeof filename !== "string") {
+            console.warn("Invalid filename passed to updateMp3Title:", filename);
+            radioScreenLine1.textContent =
+                currentMode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
+            radioScreenLine2.textContent = "INVALID FILE";
+            return;
+        }
+
+        let clean = filename.replace(/\.mp3$/i, "");
+        clean = clean.replace(/^.*?\//, "");
+
         radioScreenLine1.textContent =
             currentMode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
-        radioScreenLine2.textContent = "INVALID FILE";
-        return;
+        radioScreenLine1.classList.remove("live-red");
+        radioScreenLine1.classList.remove("mp3-title");
+
+        radioScreenLine2.textContent = clean;
+        radioScreenLine2.classList.add("mp3-title");
     }
-
-    let clean = filename.replace(/\.mp3$/i, "");
-    clean = clean.replace(/^.*?\//, "");
-
-    radioScreenLine1.textContent =
-        currentMode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
-    radioScreenLine1.classList.remove("live-red");
-    radioScreenLine1.classList.remove("mp3-title");
-
-    radioScreenLine2.textContent = clean;
-    radioScreenLine2.classList.add("mp3-title");
-}
-
 
     function getNextTrack(mode) {
         ensureShuffle(mode);
@@ -1589,9 +1608,6 @@ const shuffleState = {
         }, 16);
     }
 
-    let prewarmAudio = new Audio();
-    prewarmAudio.preload = "auto";
-
     function updateBarAnimation() {
         const bars = document.querySelector(".led-bars");
         if (isPlaying) {
@@ -1601,77 +1617,65 @@ const shuffleState = {
         }
     }
 
-   function playRadio(index) {
-    currentRadioIndex = (index + radioItems.length) % radioItems.length;
-    const station = radioItems[currentRadioIndex];
+    function playRadio(index) {
+        currentRadioIndex = (index + radioItems.length) % radioItems.length;
+        const station = radioItems[currentRadioIndex];
 
-    updateSonyHeader(station.name, "LIVE", true);
+        updateSonyHeader(station.name, "LIVE", true);
 
-    // Apply correct RADIO styling AFTER header update
-    requestAnimationFrame(() => {
-        radioScreenLine2.classList.remove("mp3-title");  // remove MP3 small text
-        radioScreenLine2.classList.add("live-red");       // apply red LIVE LED
-    });
+        requestAnimationFrame(() => {
+            radioScreenLine2.classList.remove("mp3-title");
+            radioScreenLine2.classList.add("live-red");
+        });
 
-    audioRadio.src = station.url;
+        audioRadio.src = station.url;
 
-    // Save the real target volume
-    const targetVolume = volSlider.value / 100;
+        const targetVolume = volSlider.value / 100;
+        audioRadio.load();
 
-    audioRadio.load();
+        if (station.name === "Atlantic Radio UK") {
+            setPlayIcon(false);
+            audioRadio.volume = 0;
 
-    // ⭐ 3‑second silent warm‑up ONLY for Atlantic Radio UK
-    if (station.name === "Atlantic Radio UK") {
+            audioRadio.play().then(() => {
+                isPlaying = true;
+                updateBarAnimation();
+                ledVol.classList.add("playing");
 
-        setPlayIcon(false);
+                setTimeout(() => {
+                    audioRadio.volume = targetVolume;
+                    setPlayIcon(true);
+                }, 3000);
+            }).catch(() => {
+                isPlaying = false;
+                updateBarAnimation();
+                setPlayIcon(false);
+                ledVol.classList.remove("playing");
+            });
 
-        // Start playing immediately but muted
-        audioRadio.volume = 0;
+        } else {
+            audioRadio.volume = targetVolume;
 
-        audioRadio.play().then(() => {
-            isPlaying = true;
-            updateBarAnimation();
-            ledVol.classList.add("playing");
-
-            // After 3 seconds, jump straight to full volume (no fade)
-            setTimeout(() => {
-                audioRadio.volume = targetVolume;
+            audioRadio.play().then(() => {
+                isPlaying = true;
+                updateBarAnimation();
                 setPlayIcon(true);
-            }, 3000);
+                fadeIn(audioRadio);
+                ledVol.classList.add("playing");
+            }).catch(() => {
+                isPlaying = false;
+                updateBarAnimation();
+                setPlayIcon(false);
+                ledVol.classList.remove("playing");
+            });
+        }
 
-        }).catch(() => {
+        audioRadio.onpause = () => {
             isPlaying = false;
             updateBarAnimation();
-            setPlayIcon(false);
             ledVol.classList.remove("playing");
-        });
-
-    } else {
-
-        // Normal instant play for all other stations
-        audioRadio.volume = targetVolume;
-
-        audioRadio.play().then(() => {
-            isPlaying = true;
-            updateBarAnimation();
-            setPlayIcon(true);
-            fadeIn(audioRadio); // your normal fade behaviour
-            ledVol.classList.add("playing");
-        }).catch(() => {
-            isPlaying = false;
-            updateBarAnimation();
-            setPlayIcon(false);
-            ledVol.classList.remove("playing");
-        });
+        };
     }
-
-    audioRadio.onpause = () => {
-        isPlaying = false;
-        updateBarAnimation();
-        ledVol.classList.remove("playing");
-    };
-}
-
 
     function setPlayIcon(playing) {
         iconPlay.style.display = playing ? "none" : "block";
@@ -1688,241 +1692,240 @@ const shuffleState = {
     }
 
     function switchMode(mode) {
-    if (mode === currentMode) return;
+        if (mode === currentMode) return;
 
-    stopAll();
-    isPlaying = false;
-    updateBarAnimation();
-    setPlayIcon(false);
+        stopAll();
+        isPlaying = false;
+        updateBarAnimation();
+        setPlayIcon(false);
 
-    ledRadio.classList.remove("active");
-    ledUsb.classList.remove("active");
+        ledRadio.classList.remove("active");
+        ledUsb.classList.remove("active");
 
-    currentMode = mode;
+        currentMode = mode;
 
-    btnRadio.classList.toggle("active", mode === MODE_RADIO);
-    btnMp3_1.classList.toggle("active", mode === MODE_MP3_1);
-    btnMp3_2.classList.toggle("active", mode === MODE_MP3_2);
+        btnRadio.classList.toggle("active", mode === MODE_RADIO);
+        btnMp3_1.classList.toggle("active", mode === MODE_MP3_1);
+        btnMp3_2.classList.toggle("active", mode === MODE_MP3_2);
 
-    if (mode === MODE_RADIO) {
-        ledRadio.classList.add("active");
+        if (mode === MODE_RADIO) {
+            ledRadio.classList.add("active");
 
-        transportRow.style.display = "flex";
-        btnPrev.style.display = "flex";
-        mp3ControlsRow.style.display = "none";
+            transportRow.style.display = "flex";
+            btnPrev.style.display = "flex";
+            mp3ControlsRow.style.display = "none";
 
-        updateSonyHeader("LOADING", "LIVE", true);
+            updateSonyHeader("LOADING", "LIVE", true);
 
-        requestAnimationFrame(() => {
-            radioScreenLine2.classList.add("live-red");
+            requestAnimationFrame(() => {
+                radioScreenLine2.classList.add("live-red");
+            });
+
+            playRadio(currentRadioIndex);
+
+        } else {
+            ledUsb.classList.add("active");
+
+            transportRow.style.display = "none";
+            btnPrev.style.display = "none";
+            mp3ControlsRow.style.display = "flex";
+
+            radioScreenLine2.classList.remove("live-red");
+
+            const headerLine2 =
+                mode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
+
+            updateSonyHeader("LOADING", headerLine2, false);
+
+            audioRadio.pause();
+            audioRadio.src = "";
+
+            setTimeout(() => {
+                const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
+
+                if (playlist.length > 0) {
+                    playNextMp3(mode);
+                } else {
+                    updateSonyHeader(
+                        mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
+                        "ADD PLAYLIST",
+                        true
+                    );
+                }
+            }, 50);
+        }
+    }
+
+    function playNextMp3(mode) {
+        const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
+        const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
+
+        if (!playlist.length) {
+            updateSonyHeader(
+                mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
+                "ADD PLAYLIST",
+                true
+            );
+            return;
+        }
+
+        const nextIndex = getNextTrack(mode);
+        const entry = playlist[nextIndex];
+
+        updateMp3Title(entry.name);
+
+        audio.src = fixPath(entry.url);
+        audio.volume = volSlider.value / 100;
+
+        audio.play().then(() => {
+            isPlaying = true;
+            updateBarAnimation();
+            ledVol.classList.add("playing");
+            mp3PlayPause.textContent = "⏸";
+            startSkipCooldown(4);   // cooldown only on manual skip
+        }).catch(() => {
+            isPlaying = false;
+            updateBarAnimation();
+            ledVol.classList.remove("playing");
+            mp3PlayPause.textContent = "▶";
         });
-
-        const station = radioItems[currentRadioIndex];
-        audioRadio.src = station.url;
-        audioRadio.load();
-
-        playRadio(currentRadioIndex);
-
-    } else {
-        ledUsb.classList.add("active");
-
-        transportRow.style.display = "none";
-        btnPrev.style.display = "none";
-        mp3ControlsRow.style.display = "flex";
-
-        radioScreenLine2.classList.remove("live-red");
-
-        const headerLine2 =
-            mode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
-
-        updateSonyHeader("LOADING", headerLine2, false);
-
-        audioRadio.pause();
-        audioRadio.src = "";
-
-        // ⭐ FIX: safe MP3 start (prevents LOADING freeze)
-        setTimeout(() => {
-            const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
-
-            if (playlist.length > 0) {
-                playNextMp3(mode);
-            } else {
-                updateSonyHeader(
-                    mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
-                    "ADD PLAYLIST",
-                    true
-                );
-            }
-        }, 50);
-    }
-}
-
-function playNextMp3(mode) {
-    const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
-    const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
-
-    if (!playlist.length) {
-        updateSonyHeader(
-            mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
-            "ADD PLAYLIST",
-            true
-        );
-        return;
     }
 
-    const nextIndex = getNextTrack(mode);
-    const entry = playlist[nextIndex];
+    function playPreviousMp3(mode) {
+        const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
+        const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
 
-    // entry.name and entry.url are now used correctly
-    updateMp3Title(entry.name);
+        if (!playlist.length) {
+            updateSonyHeader(
+                mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
+                "ADD PLAYLIST",
+                true
+            );
+            return;
+        }
 
-    audio.src = fixPath(entry.url);
-    audio.volume = volSlider.value / 100;
+        const key = getShuffleKey(mode);
+        const state = shuffleState[key];
 
-    audio.play().then(() => {
+        if (!state.order.length) {
+            ensureShuffle(mode);
+        }
+
+        state.index--;
+        if (state.index < 0) state.index = state.order.length - 1;
+
+        const prevIndex = state.order[state.index];
+        const entry = playlist[prevIndex];
+
+        updateMp3Title(entry.name);
+
+        audio.src = fixPath(entry.url);
+        audio.volume = volSlider.value / 100;
+
+        audio.play().then(() => {
+            isPlaying = true;
+            updateBarAnimation();
+            ledVol.classList.add("playing");
+            mp3PlayPause.textContent = "⏸";
+            startSkipCooldown(4);
+        }).catch(() => {
+            isPlaying = false;
+            updateBarAnimation();
+            ledVol.classList.remove("playing");
+            mp3PlayPause.textContent = "▶";
+        });
+    }
+
+    /* ===========================
+       MP3 CONTROLS
+       =========================== */
+
+    mp3Back15.addEventListener("click", () => {
+        const audio = getCurrentAudio();
+        if (audio) audio.currentTime = Math.max(0, audio.currentTime - 15);
+    });
+
+    mp3Forward15.addEventListener("click", () => {
+        const audio = getCurrentAudio();
+        if (audio && audio.duration)
+            audio.currentTime = Math.min(audio.duration, audio.currentTime + 15);
+    });
+
+    mp3PlayPause.addEventListener("click", () => {
+        const audio = getCurrentAudio();
+        if (!audio) return;
+
+        audio.volume = volSlider.value / 100;
+
+        if (audio.paused) {
+            audio.play();
+        } else {
+            audio.pause();
+        }
+    });
+
+    mp3Next.addEventListener("click", () => {
+        if (skipCooldown) return;
+        if (currentMode === MODE_MP3_1 || currentMode === MODE_MP3_2) {
+            playNextMp3(currentMode);
+        }
+    });
+
+    audioMp3_1.onplay = audioMp3_2.onplay = () => {
         isPlaying = true;
         updateBarAnimation();
         ledVol.classList.add("playing");
         mp3PlayPause.textContent = "⏸";
-    }).catch(() => {
+    };
+
+    audioMp3_1.onpause = audioMp3_2.onpause = () => {
         isPlaying = false;
         updateBarAnimation();
         ledVol.classList.remove("playing");
         mp3PlayPause.textContent = "▶";
+    };
+
+    // ⭐ AUTO-SKIP WHEN TRACK ENDS (NO COOLDOWN)
+    audioMp3_1.onended = () => {
+        playNextMp3(MODE_MP3_1);
+    };
+
+    audioMp3_2.onended = () => {
+        playNextMp3(MODE_MP3_2);
+    };
+
+    /* ===========================
+       VOLUME
+       =========================== */
+
+    function applyVolumeToCurrentAudio(v) {
+        const audio = getCurrentAudio();
+        if (audio) audio.volume = v / 100;
+        ledVol.textContent = "VOL " + v + "%";
+    }
+
+    volSlider.addEventListener("input", () => {
+        let v = parseInt(volSlider.value);
+        v = Math.round(v / 10) * 10;
+        volSlider.value = v;
+        applyVolumeToCurrentAudio(v);
     });
-}
 
+    volUp.addEventListener("click", () => {
+        let v = parseInt(volSlider.value);
+        v = Math.min(100, v + 10);
+        volSlider.value = v;
+        applyVolumeToCurrentAudio(v);
+    });
 
- 
+    volDown.addEventListener("click", () => {
+        let v = parseInt(volSlider.value);
+        v = Math.max(0, v - 10);
+        volSlider.value = v;
+        applyVolumeToCurrentAudio(v);
+    });
 
-    mp3Back15.addEventListener("click", () => {
-    const audio = getCurrentAudio();
-    if (audio) audio.currentTime = Math.max(0, audio.currentTime - 15);
-});
-
-mp3Forward15.addEventListener("click", () => {
-    const audio = getCurrentAudio();
-    if (audio && audio.duration)
-        audio.currentTime = Math.min(audio.duration, audio.currentTime + 15);
-});
-
-mp3PlayPause.addEventListener("click", () => {
-    const audio = getCurrentAudio();
-    if (!audio) return;
-
-    // ⭐ FIX: ensure MP3 players get correct volume
-    audio.volume = volSlider.value / 100;
-
-    if (audio.paused) {
-        audio.play();
-    } else {
-        audio.pause();
-    }
-});
-
-mp3Next.addEventListener("click", () => {
-    if (currentMode === MODE_MP3_1) playNextMp3(MODE_MP3_1);
-    if (currentMode === MODE_MP3_2) playNextMp3(MODE_MP3_2);
-});
-
-audioMp3_1.onplay = audioMp3_2.onplay = () => {
-    isPlaying = true;
-    updateBarAnimation();
-    ledVol.classList.add("playing");
-    mp3PlayPause.textContent = "⏸";
-};
-
-audioMp3_1.onpause = audioMp3_2.onpause = () => {
-    isPlaying = false;
-    updateBarAnimation();
-    ledVol.classList.remove("playing");
-    mp3PlayPause.textContent = "▶";
-};
-
-audioMp3_1.onended = () => {
-    playNextMp3(MODE_MP3_1);
-};
-
-audioMp3_2.onended = () => {
-    playNextMp3(MODE_MP3_2);
-};
-
-
-
-
-btnRadio.addEventListener("click", () => switchMode(MODE_RADIO));
-btnMp3_1.addEventListener("click", () => switchMode(MODE_MP3_1));
-btnMp3_2.addEventListener("click", () => switchMode(MODE_MP3_2));
-
-btnPrev.addEventListener("click", () => {
-    if (currentMode === MODE_RADIO) playRadio(currentRadioIndex - 1);
-});
-
-btnNext.addEventListener("click", () => {
-    if (currentMode === MODE_RADIO) {
-        playRadio(currentRadioIndex + 1);
-    } else if (currentMode === MODE_MP3_1 || currentMode === MODE_MP3_2) {
-        playNextMp3(currentMode);
-    }
-});
-
-btnPlayPause.addEventListener("click", () => {
-    const audio = getCurrentAudio();
-    if (!audio) return;
-
-    let v = Math.round(parseInt(volSlider.value) / 10) * 10;
-    volSlider.value = v;
-    audio.volume = v / 100;
-
-    if (audio.paused) {
-        audio.play().then(() => {
-            isPlaying = true;
-            setPlayIcon(true);
-            updateBarAnimation();
-            ledVol.classList.add("playing");
-            fadeIn(audio);
-        });
-    } else {
-        audio.pause();
-        isPlaying = false;
-        setPlayIcon(false);
-        updateBarAnimation();
-        ledVol.classList.remove("playing");
-   }
-});
-
-/* ===========================
-   VOLUME
-   =========================== */
-
-function applyVolumeToCurrentAudio(v) {
-    const audio = getCurrentAudio();
-    if (audio) audio.volume = v / 100;
-    ledVol.textContent = "VOL " + v + "%";
-}
-
-volSlider.addEventListener("input", () => {
-    let v = parseInt(volSlider.value);
-    v = Math.round(v / 10) * 10;
-    volSlider.value = v;
-    applyVolumeToCurrentAudio(v);
-});
-
-volUp.addEventListener("click", () => {
-    let v = parseInt(volSlider.value);
-    v = Math.min(100, v + 10);
-    volSlider.value = v;
-    applyVolumeToCurrentAudio(v);
-});
-
-volDown.addEventListener("click", () => {
-    let v = parseInt(volSlider.value);
-    v = Math.max(0, v - 10);
-    volSlider.value = v;
-    applyVolumeToCurrentAudio(v);
-});
-
-/* ===========================
+    /* ===========================
    BACKGROUND
    =========================== */
 
@@ -1934,129 +1937,190 @@ const preloadImages = (arr) => {
 };
 
 preloadImages([
-    "backgrounds/bg_day1.jpg",
-    "backgrounds/bg_day2.jpg",
+    "backgrounds/bg_day1.png",
+    "backgrounds/bg_day2.png",
     "backgrounds/bg_day3.jpg",
-    "backgrounds/bg_day4.jpg",
-    "backgrounds/bg_day5.jpg",
-    "backgrounds/bg_night1.jpg",
-    "backgrounds/bg_night2.jpg",
-    "backgrounds/bg_night3.jpg"
+    "backgrounds/bg_day4.png",
+    "backgrounds/bg_day5.png",
+    "backgrounds/bg_day6.png",
+
+    "backgrounds/bg_night1.png",
+    "backgrounds/bg_night2.png",
+    "backgrounds/bg_night3.png"
 ]);
 
-
 const dayBackgrounds = [
-    "backgrounds/bg_day1.jpg",
-    "backgrounds/bg_day2.jpg",
+    "backgrounds/bg_day1.png",
+    "backgrounds/bg_day2.png",
     "backgrounds/bg_day3.jpg",
-    "backgrounds/bg_day4.jpg",
-    "backgrounds/bg_day5.jpg"
+    "backgrounds/bg_day4.png",
+    "backgrounds/bg_day5.png",
+    "backgrounds/bg_day6.png"
 ];
 
 const nightBackgrounds = [
-    "backgrounds/bg_night1.jpg",
-    "backgrounds/bg_night2.jpg",
-    "backgrounds/bg_night3.jpg"
+    "backgrounds/bg_night1.png",
+    "backgrounds/bg_night2.png",
+    "backgrounds/bg_night3.png"
 ];
 
-const now = new Date();
-const hour = now.getHours();
-const minute = now.getMinutes();
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
 
-// Night starts at 21:30 (9:30 PM) and runs until 05:00
-const isNight = (hour > 21 || (hour === 21 && minute >= 30) || hour < 5);
+    const isNight = (hour > 21 || (hour === 21 && minute >= 30) || hour < 5);
 
+    const chosenBackground = isNight
+        ? nightBackgrounds[Math.floor(Math.random() * nightBackgrounds.length)]
+        : dayBackgrounds[Math.floor(Math.random() * dayBackgrounds.length)];
 
-const chosenBackground = isNight
-    ? nightBackgrounds[Math.floor(Math.random() * nightBackgrounds.length)]
-    : dayBackgrounds[Math.floor(Math.random() * dayBackgrounds.length)];
+    document.getElementById("bg").style.backgroundImage = `url('${chosenBackground}')`;
 
-document.getElementById("bg").style.backgroundImage = `url('${chosenBackground}')`;
+    /* ===========================
+       MSN CHAT BOX (localStorage)
+       =========================== */
 
-currentMode = null;
-radioScreenLine1.textContent = "";
-radioScreenLine2.textContent = "";
-radioScreenLine2.classList.remove("live-red");
-setPlayIcon(false);
-
-applyVolumeToCurrentAudio(parseInt(volSlider.value));
-updateBarAnimation();
-
-audioRadio.src = radioItems[currentRadioIndex].url;
-audioRadio.load();
-
-/* ===========================
-   MSN CHAT BOX JS (with localStorage)
-   =========================== */
-
-function saveTimestamp() {
-    localStorage.setItem("msn_lastMessageTime", Date.now());
-}
-
-function checkForExpiry() {
-    const last = localStorage.getItem("msn_lastMessageTime");
-    if (!last) return;
-
-    const now = Date.now();
-    const hours24 = 24 * 60 * 60 * 1000;
-
-    if (now - last > hours24) {
-        localStorage.removeItem("msn_chatMessages");
-        localStorage.removeItem("msn_lastMessageTime");
-        document.getElementById("chatMessages").innerHTML = "";
+    function saveTimestamp() {
+        localStorage.setItem("msn_lastMessageTime", Date.now());
     }
-}
 
-checkForExpiry();
+    function checkForExpiry() {
+        const last = localStorage.getItem("msn_lastMessageTime");
+        if (!last) return;
 
-/* ⭐ Load saved messages on startup */
-(function loadMessages() {
-    const saved = localStorage.getItem("msn_chatMessages");
-    if (saved) {
-        document.getElementById("chatMessages").innerHTML = saved;
-        const box = document.getElementById("chatMessages");
-        box.scrollTop = box.scrollHeight;
+        const nowTs = Date.now();
+        const hours24 = 24 * 60 * 60 * 1000;
+
+        if (nowTs - last > hours24) {
+            localStorage.removeItem("msn_chatMessages");
+            localStorage.removeItem("msn_lastMessageTime");
+            document.getElementById("chatMessages").innerHTML = "";
+        }
     }
-})();
 
-/* ⭐ Save messages after every send */
-function saveMessages() {
-    const messages = document.getElementById("chatMessages").innerHTML;
-    localStorage.setItem("msn_chatMessages", messages);
-    saveTimestamp();
-}
+    checkForExpiry();
 
-function sendMessage() {
-    const input = document.getElementById("chatInput");
-    const messages = document.getElementById("chatMessages");
+    (function loadMessages() {
+        const saved = localStorage.getItem("msn_chatMessages");
+        if (saved) {
+            document.getElementById("chatMessages").innerHTML = saved;
+            const box = document.getElementById("chatMessages");
+            box.scrollTop = box.scrollHeight;
+        }
+    })();
 
-    if (input.innerHTML.trim() === "") return;
+    function saveMessages() {
+        const messages = document.getElementById("chatMessages").innerHTML;
+        localStorage.setItem("msn_chatMessages", messages);
+        saveTimestamp();
+    }
 
-    const msg = document.createElement("div");
-    msg.className = "msg you";
-    msg.innerHTML = input.innerHTML;
+    function sendMessage() {
+        const input = document.getElementById("chatInput");
+        const messages = document.getElementById("chatMessages");
 
-    messages.appendChild(msg);
-    messages.scrollTop = messages.scrollHeight;
+        if (input.innerHTML.trim() === "") return;
 
-    input.innerHTML = "";
+        const msg = document.createElement("div");
+        msg.className = "msg you";
+        msg.innerHTML = input.innerHTML;
 
-    saveMessages();  // ⭐ now saves to localStorage
-}
+        messages.appendChild(msg);
+        messages.scrollTop = messages.scrollHeight;
 
-function addEmote(file) {
-    const input = document.getElementById("chatInput");
-    input.innerHTML += ` <img src="emotes/${file}" style="width:16px;height:16px;"> `;
-    input.focus();
-}
+        input.innerHTML = "";
 
-/* ⭐ MAKE CHAT FUNCTIONS GLOBAL ⭐ */
-window.sendMessage = sendMessage;
-window.addEmote = addEmote;
+        saveMessages();
+    }
 
+    function addEmote(file) {
+        const input = document.getElementById("chatInput");
+        input.innerHTML += ` <img src="emotes/${file}" style="width:16px;height:16px;"> `;
+        input.focus();
+    }
 
-}); // END DOMContentLoaded
+    window.sendMessage = sendMessage;
+    window.addEmote = addEmote;
+
+    /* ===========================
+       MODE BUTTONS + TRANSPORT
+       =========================== */
+
+    btnRadio.addEventListener("click", () => {
+        switchMode(MODE_RADIO);
+    });
+
+    btnMp3_1.addEventListener("click", () => {
+        switchMode(MODE_MP3_1);
+    });
+
+    btnMp3_2.addEventListener("click", () => {
+        switchMode(MODE_MP3_2);
+    });
+
+    btnPrev.addEventListener("click", () => {
+        if (skipCooldown) return;
+
+        if (currentMode === MODE_RADIO) {
+            playRadio(currentRadioIndex - 1);
+        } else if (currentMode === MODE_MP3_1 || currentMode === MODE_MP3_2) {
+            playPreviousMp3(currentMode);
+        }
+    });
+
+    btnNext.addEventListener("click", () => {
+        if (skipCooldown) return;
+
+        if (currentMode === MODE_RADIO) {
+            playRadio(currentRadioIndex + 1);
+        } else if (currentMode === MODE_MP3_1 || currentMode === MODE_MP3_2) {
+            playNextMp3(currentMode);
+        }
+    });
+
+    btnPlayPause.addEventListener("click", () => {
+        const audio = getCurrentAudio();
+        if (!audio) return;
+
+        let v = Math.round(parseInt(volSlider.value) / 10) * 10;
+        volSlider.value = v;
+        audio.volume = v / 100;
+
+        if (audio.paused) {
+            audio.play().then(() => {
+                isPlaying = true;
+                setPlayIcon(true);
+                updateBarAnimation();
+                ledVol.classList.add("playing");
+                fadeIn(audio);
+            });
+        } else {
+            audio.pause();
+            isPlaying = false;
+            setPlayIcon(false);
+            updateBarAnimation();
+            ledVol.classList.remove("playing");
+        }
+    });
+
+    /* ===========================
+       INITIAL STATE
+       =========================== */
+
+    currentMode = null;
+    radioScreenLine1.textContent = "";
+    radioScreenLine2.textContent = "";
+    radioScreenLine2.classList.remove("live-red");
+    setPlayIcon(false);
+
+    applyVolumeToCurrentAudio(parseInt(volSlider.value));
+    updateBarAnimation();
+
+   
+
+});
 </script>
 
+    
 </body>
 </html>
