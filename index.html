@@ -566,37 +566,26 @@ html, body {
     </div>
 
     <div class="mp3-controls-row">
-        <button id="mp3-back15" class="control-btn">-15</button>
-        <button id="mp3-playpause" class="mp3-circle-btn">▶</button>
-        <button id="mp3-next" class="mp3-circle-btn">⏭</button>
-        <button id="mp3-forward15" class="control-btn">+15</button>
-    </div>
+    <button id="mp3-back15" class="control-btn">-15</button>
+
+    <button id="mp3Prev" class="mp3-circle-btn">⏮</button>
+
+    <button id="mp3-playpause" class="mp3-circle-btn">▶</button>
+
+    <button id="mp3-next" class="mp3-circle-btn">⏭</button>
+
+    <button id="mp3-forward15" class="control-btn">+15</button>
+</div>
+
 
     <div class="transport-row">
-        <button class="transport-btn" id="btnPrev">
-            <svg viewBox="0 0 24 24">
-                <polygon points="15,5 6,12 15,19"></polygon>
-                <rect x="16" y="5" width="2" height="14"></rect>
-            </svg>
-        </button>
+    <button id="btnPrev" class="mp3-circle-btn">⏮</button>
 
-        <button class="transport-btn" id="btnPlayPause">
-            <svg id="iconPlay" viewBox="0 0 24 24">
-                <polygon points="8,5 19,12 8,19"></polygon>
-            </svg>
-            <svg id="iconPause" viewBox="0 0 24 24" style="display:none;">
-                <rect x="7" y="5" width="4" height="14"></rect>
-                <rect x="13" y="5" width="4" height="14"></rect>
-            </svg>
-        </button>
+    <button id="btnPlayPause" class="mp3-circle-btn">▶</button>
 
-        <button class="transport-btn" id="btnNext">
-            <svg viewBox="0 0 24 24">
-                <polygon points="6,5 15,12 6,19"></polygon>
-                <rect x="17" y="5" width="2" height="14"></rect>
-            </svg>
-        </button>
-    </div>
+    <button id="btnNext" class="mp3-circle-btn">⏭</button>
+</div>
+
 
     <div class="volume-row">
         <button id="volDown" class="vol-btn">VOL −</button>
@@ -671,6 +660,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const volDown = document.getElementById("volDown");
 
     const mp3Back15 = document.getElementById("mp3-back15");
+    const mp3Prev = document.getElementById("mp3Prev");
+
     const mp3PlayPause = document.getElementById("mp3-playpause");
     const mp3Next = document.getElementById("mp3-next");
     const mp3Forward15 = document.getElementById("mp3-forward15");
@@ -678,6 +669,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const MODE_RADIO = "radio";
     const MODE_MP3_1 = "mp3_1";
     const MODE_MP3_2 = "mp3_2";
+
+let hasPlayedFirstTrack = false;
+
+let mp3HasStarted = false;
+
+let mp3TrackNumber = 0;
+
+
+
 
     let currentMode = null;
     let isPlaying = false;
@@ -1499,12 +1499,7 @@ const radioItems = [
         return mode === MODE_MP3_1 ? "mp3_1" : "mp3_2";
     }
 
-    function startSkipCooldown(seconds) {
-        skipCooldown = true;
-        setTimeout(() => {
-            skipCooldown = false;
-        }, seconds * 1000);
-    }
+   
 
     function buildShuffleOrder(length) {
         const arr = [...Array(length).keys()];
@@ -1515,28 +1510,36 @@ const radioItems = [
         return arr;
     }
 
+function isFirstTrack(mode) {
+    const key = getShuffleKey(mode);
+    const state = shuffleState[key];
+    return state.index === 0;
+}
+
+
     function ensureShuffle(mode) {
-        const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
-        const key = getShuffleKey(mode);
-        const state = shuffleState[key];
+    const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
+    const key = getShuffleKey(mode);
+    const state = shuffleState[key];
 
-        if (!playlist.length) {
-            state.order = [];
-            state.index = 0;
-            return;
-        }
-
-        if (state.order.length !== playlist.length) {
-            state.order = buildShuffleOrder(playlist.length);
-            state.index = 0;
-            return;
-        }
-
-        if (state.index >= state.order.length) {
-            state.order = buildShuffleOrder(playlist.length);
-            state.index = 0;
-        }
+    if (!playlist.length) {
+        state.order = [];
+        state.index = -1;   // ⭐ no tracks played
+        return;
     }
+
+    if (state.order.length !== playlist.length) {
+        state.order = buildShuffleOrder(playlist.length);
+        state.index = -1;   // ⭐ first track not chosen yet
+        return;
+    }
+
+    if (state.index >= state.order.length) {
+        state.order = buildShuffleOrder(playlist.length);
+        state.index = -1;   // ⭐ reset to “no track played”
+    }
+}
+
 
     function updateMp3Title(filename) {
         if (typeof filename !== "string") {
@@ -1560,17 +1563,25 @@ const radioItems = [
     }
 
     function getNextTrack(mode) {
-        ensureShuffle(mode);
-        const key = getShuffleKey(mode);
-        const state = shuffleState[key];
+    ensureShuffle(mode);
+    const key = getShuffleKey(mode);
+    const state = shuffleState[key];
 
-        if (!state.order.length) return null;
+    if (!state.order.length) return null;
 
-        state.index++;
-        if (state.index >= state.order.length) state.index = 0;
-
+    // ⭐ If this is the very first track, DO NOT increment
+    if (state.index === -1) {
+        state.index = 0;
         return state.order[state.index];
     }
+
+    // ⭐ Normal behaviour after the first track
+    state.index++;
+    if (state.index >= state.order.length) state.index = 0;
+
+    return state.order[state.index];
+}
+
 
     function fixPath(path) {
         return encodeURI(path);
@@ -1678,9 +1689,9 @@ const radioItems = [
     }
 
     function setPlayIcon(playing) {
-        iconPlay.style.display = playing ? "none" : "block";
-        iconPause.style.display = playing ? "block" : "none";
-    }
+    btnPlayPause.textContent = playing ? "⏸" : "▶";
+}
+
 
     function stopAll() {
         audioRadio.pause();
@@ -1692,149 +1703,143 @@ const radioItems = [
     }
 
     function switchMode(mode) {
-        if (mode === currentMode) return;
+    if (mode === currentMode) return;
 
-        stopAll();
-        isPlaying = false;
-        updateBarAnimation();
-        setPlayIcon(false);
+    stopAll();
+    isPlaying = false;
+    updateBarAnimation();
+    setPlayIcon(false);
 
-        ledRadio.classList.remove("active");
-        ledUsb.classList.remove("active");
+    ledRadio.classList.remove("active");
+    ledUsb.classList.remove("active");
 
-        currentMode = mode;
+    currentMode = mode;
 
-        btnRadio.classList.toggle("active", mode === MODE_RADIO);
-        btnMp3_1.classList.toggle("active", mode === MODE_MP3_1);
-        btnMp3_2.classList.toggle("active", mode === MODE_MP3_2);
+    btnRadio.classList.toggle("active", mode === MODE_RADIO);
+    btnMp3_1.classList.toggle("active", mode === MODE_MP3_1);
+    btnMp3_2.classList.toggle("active", mode === MODE_MP3_2);
 
-        if (mode === MODE_RADIO) {
-            ledRadio.classList.add("active");
+    if (mode === MODE_RADIO) {
+        ledRadio.classList.add("active");
 
-            transportRow.style.display = "flex";
-            btnPrev.style.display = "flex";
-            mp3ControlsRow.style.display = "none";
+        transportRow.style.display = "flex";
+        btnPrev.style.display = "flex";
+        mp3ControlsRow.style.display = "none";
 
-            updateSonyHeader("LOADING", "LIVE", true);
+        updateSonyHeader("LOADING", "LIVE", true);
 
-            requestAnimationFrame(() => {
-                radioScreenLine2.classList.add("live-red");
-            });
+        requestAnimationFrame(() => {
+            radioScreenLine2.classList.add("live-red");
+        });
 
-            playRadio(currentRadioIndex);
+        playRadio(currentRadioIndex);
 
-        } else {
-            ledUsb.classList.add("active");
+    } else {
+        ledUsb.classList.add("active");
 
-            transportRow.style.display = "none";
-            btnPrev.style.display = "none";
-            mp3ControlsRow.style.display = "flex";
+        transportRow.style.display = "none";
+        btnPrev.style.display = "none";
+        mp3ControlsRow.style.display = "flex";
 
-            radioScreenLine2.classList.remove("live-red");
+        radioScreenLine2.classList.remove("live-red");
 
-            const headerLine2 =
-                mode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
+        const headerLine2 =
+            mode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
 
-            updateSonyHeader("LOADING", headerLine2, false);
+        updateSonyHeader("LOADING", headerLine2, false);
 
-            audioRadio.pause();
-            audioRadio.src = "";
+        audioRadio.pause();
+        audioRadio.src = "";
 
-            setTimeout(() => {
-                const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
+        // ⭐ THIS WAS MISSING — resets track position so PREV is disabled
+        mp3TrackNumber = 0;
 
-                if (playlist.length > 0) {
-                    playNextMp3(mode);
-                } else {
-                    updateSonyHeader(
-                        mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
-                        "ADD PLAYLIST",
-                        true
-                    );
-                }
-            }, 50);
-        }
+        setTimeout(() => {
+            const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
+
+            if (playlist.length > 0) {
+                playNextMp3(mode);
+            } else {
+                updateSonyHeader(
+                    mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
+                    "ADD PLAYLIST",
+                    true
+                );
+            }
+        }, 50);
+    }
+}
+
+   function playNextMp3(mode) {
+    const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
+    const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
+
+    if (!playlist.length) {
+        updateSonyHeader(
+            mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
+            "ADD PLAYLIST",
+            true
+        );
+        return;
     }
 
-    function playNextMp3(mode) {
-        const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
-        const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
+    const nextIndex = getNextTrack(mode);
+    const entry = playlist[nextIndex];
 
-        if (!playlist.length) {
-            updateSonyHeader(
-                mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
-                "ADD PLAYLIST",
-                true
-            );
-            return;
-        }
+    updateMp3Title(entry.name);
 
-        const nextIndex = getNextTrack(mode);
-        const entry = playlist[nextIndex];
+    audio.src = fixPath(entry.url);
+    audio.volume = volSlider.value / 100;
 
-        updateMp3Title(entry.name);
-
-        audio.src = fixPath(entry.url);
-        audio.volume = volSlider.value / 100;
-
-        audio.play().then(() => {
+    audio.play()
+        .then(() => {
             isPlaying = true;
             updateBarAnimation();
             ledVol.classList.add("playing");
             mp3PlayPause.textContent = "⏸";
-            startSkipCooldown(4);   // cooldown only on manual skip
-        }).catch(() => {
+
+            mp3TrackNumber++;   // ⭐ correct place
+        })
+        .catch(() => {
             isPlaying = false;
             updateBarAnimation();
             ledVol.classList.remove("playing");
             mp3PlayPause.textContent = "▶";
         });
+}
+
+
+function playPreviousMp3(mode) {
+    const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
+    const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
+
+    if (!playlist.length) return;
+
+    const key = getShuffleKey(mode);
+    const state = shuffleState[key];
+
+    if (!state.order.length) ensureShuffle(mode);
+
+    // ⭐ If we're at the first track, do nothing
+    if (state.index <= 0) {
+        return;
     }
 
-    function playPreviousMp3(mode) {
-        const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
-        const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
+    // Move back one track
+    state.index--;
 
-        if (!playlist.length) {
-            updateSonyHeader(
-                mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
-                "ADD PLAYLIST",
-                true
-            );
-            return;
-        }
+    const prevIndex = state.order[state.index];
+    const entry = playlist[prevIndex];
 
-        const key = getShuffleKey(mode);
-        const state = shuffleState[key];
+    updateMp3Title(entry.name);
 
-        if (!state.order.length) {
-            ensureShuffle(mode);
-        }
+    audio.src = fixPath(entry.url);
+    audio.volume = volSlider.value / 100;
+    audio.play();
+}
 
-        state.index--;
-        if (state.index < 0) state.index = state.order.length - 1;
 
-        const prevIndex = state.order[state.index];
-        const entry = playlist[prevIndex];
-
-        updateMp3Title(entry.name);
-
-        audio.src = fixPath(entry.url);
-        audio.volume = volSlider.value / 100;
-
-        audio.play().then(() => {
-            isPlaying = true;
-            updateBarAnimation();
-            ledVol.classList.add("playing");
-            mp3PlayPause.textContent = "⏸";
-            startSkipCooldown(4);
-        }).catch(() => {
-            isPlaying = false;
-            updateBarAnimation();
-            ledVol.classList.remove("playing");
-            mp3PlayPause.textContent = "▶";
-        });
-    }
+   
 
     /* ===========================
        MP3 CONTROLS
@@ -1851,6 +1856,20 @@ const radioItems = [
             audio.currentTime = Math.min(audio.duration, audio.currentTime + 15);
     });
 
+mp3Prev.addEventListener("click", () => {
+    if (currentMode !== MODE_MP3_1 && currentMode !== MODE_MP3_2) return;
+
+    if (mp3TrackNumber <= 0) return;  // ⭐ block on first track
+
+    mp3TrackNumber--;  // ⭐ move back one
+    playPreviousMp3(currentMode);
+});
+
+
+
+
+
+
     mp3PlayPause.addEventListener("click", () => {
         const audio = getCurrentAudio();
         if (!audio) return;
@@ -1865,18 +1884,24 @@ const radioItems = [
     });
 
     mp3Next.addEventListener("click", () => {
-        if (skipCooldown) return;
-        if (currentMode === MODE_MP3_1 || currentMode === MODE_MP3_2) {
-            playNextMp3(currentMode);
-        }
-    });
+    if (currentMode === MODE_MP3_1 || currentMode === MODE_MP3_2) {
+        playNextMp3(currentMode);
+    }
+});
 
-    audioMp3_1.onplay = audioMp3_2.onplay = () => {
-        isPlaying = true;
-        updateBarAnimation();
-        ledVol.classList.add("playing");
-        mp3PlayPause.textContent = "⏸";
-    };
+
+ audioMp3_1.onplay = audioMp3_2.onplay = () => {
+    if (mp3TrackNumber === 0) {
+        // first track is playing
+    }
+    isPlaying = true;
+    updateBarAnimation();
+    ledVol.classList.add("playing");
+    mp3PlayPause.textContent = "⏸";
+};
+
+
+
 
     audioMp3_1.onpause = audioMp3_2.onpause = () => {
         isPlaying = false;
