@@ -400,129 +400,6 @@ html, body {
     margin-top: -5px;
 }
 
-/* ===========================
-   MSN CHAT BOX (FINAL VERSION)
-   =========================== */
-
-.msn-window {
-    width: 260px;
-    height: 190px;
-
-    background: rgba(255, 255, 255, 0.008); /* almost invisible */
-    border: 1px solid rgba(255, 255, 255, 0.02); /* faint outline */
-    border-radius: 12px;
-
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-
-    box-shadow:
-        0 0 0 1px rgba(255,255,255,0.01),
-        0 3px 10px rgba(0,0,0,0.12); /* very soft float */
-
-    display: flex;
-    flex-direction: column;
-
-    padding: 6px;
-    margin-top: 320px;
-    margin-left: 30px;
-}
-
-
-.msn-messages {
-    flex: 1;
-    overflow-y: auto;
-
-    background: rgba(0,0,0,0.06); /* extremely soft */
-    border-radius: 6px;
-
-    padding: 4px;
-    font-size: 12px;
-    color: #fff;
-}
-
-
-
-
-.msn-toolbar img {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    opacity: 0.75; /* softer */
-    transition: opacity 0.15s ease;
-}
-
-.msn-toolbar img:hover {
-    opacity: 1;
-}
-
-
-.msn-input-area {
-    display: flex;
-    gap: 6px;
-    margin-top: 6px;
-}
-
-.msn-input {
-    flex: 1;
-    min-height: 22px;
-    font-size: 12px;
-    padding: 5px;
-
-    background: rgba(255,255,255,0.05); /* softer */
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 4px;
-
-    color: #fff;
-    outline: none;
-}
-
-
-.msn-send {
-    width: 55px;
-    font-size: 12px;
-    padding: 5px;
-
-    background: rgba(255,255,255,0.05); /* soft */
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 4px;
-
-    cursor: pointer;
-    color: #fff;
-}
-
-.msn-send:hover {
-    background: rgba(255,255,255,0.10); /* gentle hover */
-}
-
-.msg {
-    margin-bottom: 5px;
-    padding: 4px 5px;
-    background: rgba(255,255,255,0.20);
-    border-radius: 4px;
-    width: fit-content;
-    max-width: 90%;
-    font-size: 11px;
-    color: #222;
-}
-
-.msg.you {
-    margin-left: 0;
-}
-
-#visitorsToday {
-    position: fixed;
-    top: 520px;      /* adjust depending on your chat box height */
-    left: 30px;      /* aligns with chat box left edge */
-
-    font-size: 10px;
-    letter-spacing: 0.5px;
-
-    color: rgba(255,255,255,0.55); /* softer white */
-    text-shadow: 0 0 3px rgba(0,0,0,0.35);
-
-    pointer-events: none;
-    z-index: 9999;
-}
 
 
 
@@ -598,28 +475,6 @@ html, body {
     <audio id="audioMp3_2"></audio>
 
 </div> <!-- END OF PLAYER SHELL -->
-
-<!-- CHAT BOX -->
-<div class="msn-window">
-
-    <div class="msn-messages" id="chatMessages"></div>
-
-    <div class="msn-toolbar">
-        <img src="emotes/1.png" onclick="addEmote('1.png')">
-        <img src="emotes/2.png" onclick="addEmote('2.png')">
-        <img src="emotes/3.png" onclick="addEmote('3.png')">
-        <img src="emotes/4.png" onclick="addEmote('4.png')">
-        <img src="emotes/5.png" onclick="addEmote('5.png')">
-        <img src="emotes/6.gif" onclick="addEmote('6.gif')">
-        <img src="emotes/7.png" onclick="addEmote('7.png')">
-    </div>
-
-    <div class="msn-input-area">
-        <div id="chatInput" class="msn-input" contenteditable="true"></div>
-        <button class="msn-send" onclick="sendMessage()">Send</button>
-    </div>
-
-</div>
 
      
 <script>
@@ -967,6 +822,9 @@ let mp3TrackNumber = 0;
 { name: "88rising - These Nights.mp3", url: "Songs 2/88rising - These Nights.mp3" },
 { name: "98 Degrees - Give Me Just One Night.mp3", url: "Songs 2/98 Degrees - Give Me Just One Night.mp3" },
 { name: "A1 - Dont Wanna Lose You Again.mp3", url: "Songs 2/A1 - Dont Wanna Lose You Again.mp3" },
+{ name: "Helen Bruner - Gimme Real Love.mp3", url: "Songs 2/Helen Bruner - Gimme Real Love.mp3" },
+{ name: "John Alford - Smoke Gets In Your Eyes.mp3", url: "Songs 2/John Alford - Smoke Gets In Your Eyes.mp3" },
+{ name: "Dazzle - Reaching.mp3", url: "Songs 2/Dazzle - Reaching.mp3" },
 { name: "AB Logic - The Hitman.mp3", url: "Songs 2/AB Logic - The Hitman.mp3" },
 { name: "Adam Rickit - Give Me Your Heart.mp3", url: "Songs 2/Adam Rickit - Give Me Your Heart.mp3" },
 { name: "Adele - Chasing Pavements.mp3", url: "Songs 2/Adele - Chasing Pavements.mp3" },
@@ -1476,7 +1334,6 @@ let mp3TrackNumber = 0;
 
     /* RADIO STATIONS */
 const radioItems = [
-    { name: "Super Q Radio UK", url: "" },
     { name: "Atlantic Extra", url: "https://cwilliams78.radioca.st/stream" },
     { name: "Hot 103 & 97", url: "https://a9.asurahosting.com:7640/radio.mp3" },
     { name: "Original Hot 103", url: "https://streaming.live365.com/a77423" },
@@ -2001,72 +1858,7 @@ const nightBackgrounds = [
 
     document.getElementById("bg").style.backgroundImage = `url('${chosenBackground}')`;
 
-    /* ===========================
-       MSN CHAT BOX (localStorage)
-       =========================== */
-
-    function saveTimestamp() {
-        localStorage.setItem("msn_lastMessageTime", Date.now());
-    }
-
-    function checkForExpiry() {
-        const last = localStorage.getItem("msn_lastMessageTime");
-        if (!last) return;
-
-        const nowTs = Date.now();
-        const hours24 = 24 * 60 * 60 * 1000;
-
-        if (nowTs - last > hours24) {
-            localStorage.removeItem("msn_chatMessages");
-            localStorage.removeItem("msn_lastMessageTime");
-            document.getElementById("chatMessages").innerHTML = "";
-        }
-    }
-
-    checkForExpiry();
-
-    (function loadMessages() {
-        const saved = localStorage.getItem("msn_chatMessages");
-        if (saved) {
-            document.getElementById("chatMessages").innerHTML = saved;
-            const box = document.getElementById("chatMessages");
-            box.scrollTop = box.scrollHeight;
-        }
-    })();
-
-    function saveMessages() {
-        const messages = document.getElementById("chatMessages").innerHTML;
-        localStorage.setItem("msn_chatMessages", messages);
-        saveTimestamp();
-    }
-
-    function sendMessage() {
-        const input = document.getElementById("chatInput");
-        const messages = document.getElementById("chatMessages");
-
-        if (input.innerHTML.trim() === "") return;
-
-        const msg = document.createElement("div");
-        msg.className = "msg you";
-        msg.innerHTML = input.innerHTML;
-
-        messages.appendChild(msg);
-        messages.scrollTop = messages.scrollHeight;
-
-        input.innerHTML = "";
-
-        saveMessages();
-    }
-
-    function addEmote(file) {
-        const input = document.getElementById("chatInput");
-        input.innerHTML += ` <img src="emotes/${file}" style="width:16px;height:16px;"> `;
-        input.focus();
-    }
-
-    window.sendMessage = sendMessage;
-    window.addEmote = addEmote;
-
+    
     /* ===========================
        MODE BUTTONS + TRANSPORT
        =========================== */
