@@ -118,21 +118,6 @@ html, body {
         0 0 2px rgba(255, 0, 0, 0.9);
 }
 
-.player-active {
-    animation: fadeSlideIn 0.4s ease forwards;
-}
-
-@keyframes fadeSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 
 /* TOP ROW */
 .led-top-row {
@@ -1392,27 +1377,6 @@ const radioItems = [
         return mode === MODE_MP3_1 ? "mp3_1" : "mp3_2";
     }
 
-function activatePlayer(playerElement) {
-    playerElement.classList.remove("player-active"); // reset
-    void playerElement.offsetWidth; // force reflow so animation restarts
-    playerElement.classList.add("player-active");
-}
-
-function showRadioPlayer() {
-    document.getElementById("radioPlayer").style.display = "block";
-    document.getElementById("mp3Player").style.display = "none";
-
-    activatePlayer(document.getElementById("radioPlayer"));
-}
-
-function showMp3Player() {
-    document.getElementById("mp3Player").style.display = "block";
-    document.getElementById("radioPlayer").style.display = "none";
-
-    activatePlayer(document.getElementById("mp3Player"));
-}
-
-   
 
     function buildShuffleOrder(length) {
         const arr = [...Array(length).keys()];
@@ -1777,12 +1741,6 @@ mp3Prev.addEventListener("click", () => {
     mp3TrackNumber--;  // ⭐ move back one
     playPreviousMp3(currentMode);
 });
-
-
-window.addEventListener("load", () => {
-    activatePlayer(document.getElementById("mainPlayerContainer"));
-});
-
 
 
 
