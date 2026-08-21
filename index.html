@@ -1887,11 +1887,13 @@ const nightBackgrounds = [
     "backgrounds/bg_night3.png"
 ];
 
-    const now = new Date();
-    const hour = now.getHours();
-    const minute = now.getMinutes();
+   const now = new Date();
+const hour = now.getHours();
+const minute = now.getMinutes();
 
-    const isNight = (hour > 21 || (hour === 21 && minute >= 30) || hour < 5);
+// Night = 21:00 → 06:00
+const isNight = (hour >= 21 || hour < 6);
+
 
     const chosenBackground = isNight
         ? nightBackgrounds[Math.floor(Math.random() * nightBackgrounds.length)]
