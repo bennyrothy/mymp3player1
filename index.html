@@ -491,17 +491,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnPlayPause = document.getElementById("btnPlayPause");
     const btnNext = document.getElementById("btnNext");
 
-    const iconPlay = document.getElementById("iconPlay");
-    const iconPause = document.getElementById("iconPause");
 
     const audioRadio = document.getElementById("audioRadio");
-    audioRadio.preload = "auto";
+    
 
     const audioMp3_1 = document.getElementById("audioMp3_1");
-    audioMp3_1.preload = "auto";
+    
 
     const audioMp3_2 = document.getElementById("audioMp3_2");
-    audioMp3_2.preload = "auto";
+    
 
     const radioScreenLine1 = document.getElementById("radioScreenLine1");
     const radioScreenLine2 = document.getElementById("radioScreenLine2");
@@ -528,9 +526,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const MODE_MP3_1 = "mp3_1";
     const MODE_MP3_2 = "mp3_2";
 
-let hasPlayedFirstTrack = false;
 
-let mp3HasStarted = false;
 
 let mp3TrackNumber = 0;
 
@@ -540,7 +536,7 @@ let mp3TrackNumber = 0;
     let currentMode = null;
     let isPlaying = false;
     let currentRadioIndex = 0;
-    let skipCooldown = false;
+    
 
 
 
@@ -550,6 +546,7 @@ let mp3TrackNumber = 0;
     { name: "East 17 - Betcha Cant Wait.mp3", url: "Songs 1/East 17 - Betcha Cant Wait.mp3" },
 { name: "3SL - Touch Me Tease Me.mp3", url: "Songs 1/3SL - Touch Me Tease Me.mp3" },
 { name: "911 - Dont Take Away The Music.mp3", url: "Songs 1/911 - Dont Take Away The Music.mp3" },
+{ name: "Gareth Gates - Just Say Yes.mp3", url: "Songs 1/Gareth Gates - Just Say Yes.mp3" },
 { name: "911 - The Day We Find Love.mp3", url: "Songs 1/911 - The Day We Find Love.mp3" },
 { name: "A Teens - I Promised Myself.mp3", url: "Songs 1/A Teens - I Promised Myself.mp3" },
 { name: "A1 - Let It Out.mp3", url: "Songs 1/A1 - Let It Out.mp3" },
@@ -664,6 +661,7 @@ let mp3TrackNumber = 0;
 { name: "Kehlani - After Hours.mp3", url: "Songs 1/Kehlani - After Hours.mp3" },
 { name: "Kelly Rowland - When Love Takes Over.mp3", url: "Songs 1/Kelly Rowland - When Love Takes Over.mp3" },
 { name: "Kym Sims - Take My Advice.mp3", url: "Songs 1/Kym Sims - Take My Advice.mp3" },
+{ name: "Michael Jackson - Hollywood Tonight.mp3", url: "Songs 1/Michael Jackson - Hollywood Tonight.mp3" },
 { name: "Lady Gaga - Born This Way.mp3", url: "Songs 1/Lady Gaga - Born This Way.mp3" },
 { name: "Lawson - When She Was Mine.mp3", url: "Songs 1/Lawson - When She Was Mine.mp3" },
 { name: "Lee West - Wishing.mp3", url: "Songs 1/Lee West - Wishing.mp3" },
@@ -705,6 +703,7 @@ let mp3TrackNumber = 0;
 { name: "Nightcrawlers - Lets Push It.mp3", url: "Songs 1/Nightcrawlers - Lets Push It.mp3" },
 { name: "Northern Line - First Time.mp3", url: "Songs 1/Northern Line - First Time.mp3" },
 { name: "Oasis - Lyla.mp3", url: "Songs 1/Oasis - Lyla.mp3" },
+{ name: "Justin Bieber - U Smile.mp3", url: "Songs 1/Justin Bieber - U Smile.mp3" },
 { name: "Oasis - The Hindu Times.mp3", url: "Songs 1/Oasis - The Hindu Times.mp3" },
 { name: "Olly Murs - Please Dont Let Me Go.mp3", url: "Songs 1/Olly Murs - Please Dont Let Me Go.mp3" },
 { name: "One Direction - Change Your Ticket.mp3", url: "Songs 1/One Direction - Change Your Ticket.mp3" },
@@ -1532,11 +1531,11 @@ function isFirstTrack(mode) {
         const station = radioItems[currentRadioIndex];
 
         updateSonyHeader(station.name, "LIVE", true);
+       radioScreenLine2.classList.remove("mp3-title");
+radioScreenLine2.classList.add("live-red");
 
-        requestAnimationFrame(() => {
-            radioScreenLine2.classList.remove("mp3-title");
-            radioScreenLine2.classList.add("live-red");
-        });
+
+       
 
         audioRadio.src = station.url;
 
@@ -1626,10 +1625,8 @@ function isFirstTrack(mode) {
         mp3ControlsRow.style.display = "none";
 
         updateSonyHeader("LOADING", "LIVE", true);
+        radioScreenLine2.classList.add("live-red");
 
-        requestAnimationFrame(() => {
-            radioScreenLine2.classList.add("live-red");
-        });
 
         playRadio(currentRadioIndex);
 
@@ -1849,27 +1846,6 @@ mp3Prev.addEventListener("click", () => {
    BACKGROUND
    =========================== */
 
-const preloadImages = (arr) => {
-    arr.forEach(src => {
-        const img = new Image();
-        img.src = src;
-    });
-};
-
-preloadImages([
-    "backgrounds/bg_day1.png",
-    "backgrounds/bg_day2.png",
-    "backgrounds/bg_day3.jpg",
-    "backgrounds/bg_day4.png",
-    "backgrounds/bg_day5.png",
-    "backgrounds/bg_day6.png",
-    "backgrounds/bg_day7.jpg",
-
-    "backgrounds/bg_night1.png",
-    "backgrounds/bg_night2.png",
-    "backgrounds/bg_night3.png"
-]);
-
 
 const dayBackgrounds = [
     "backgrounds/bg_day1.png",
@@ -1919,7 +1895,7 @@ const isNight = (hour >= 21 || hour < 6);
     });
 
     btnPrev.addEventListener("click", () => {
-        if (skipCooldown) return;
+        
 
         if (currentMode === MODE_RADIO) {
             playRadio(currentRadioIndex - 1);
@@ -1929,7 +1905,7 @@ const isNight = (hour >= 21 || hour < 6);
     });
 
     btnNext.addEventListener("click", () => {
-        if (skipCooldown) return;
+       
 
         if (currentMode === MODE_RADIO) {
             playRadio(currentRadioIndex + 1);
