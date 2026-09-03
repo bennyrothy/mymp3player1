@@ -861,6 +861,7 @@ let mp3TrackNumber = 0;
 { name: "Detroit Emeralds - Feel The Need In Me.mp3", url: "Songs 2/Detroit Emeralds - Feel The Need In Me.mp3" },
 { name: "Carpenters - Top Of The World.mp3", url: "Songs 2/Carpenters - Top Of The World.mp3" },
 { name: "Charles And Eddie - NYC.mp3", url: "Songs 2/Charles And Eddie - NYC.mp3" },
+{ name: "Bright Light With Elton John - All In The Name.mp3", url: "Songs 2/Bright Light With Elton John - All In The Name.mp3" },
 { name: "Amber - One More Night.mp3", url: "Songs 2/Amber - One More Night.mp3" },
 { name: "Anastacia - Take This Chance.mp3", url: "Songs 2/Anastacia - Take This Chance.mp3" },
 { name: "Andy Murphy - Cant Keep Me.mp3", url: "Songs 2/Andy Murphy - Cant Keep Me.mp3" },
@@ -1871,8 +1872,13 @@ const nightBackgrounds = [
 const hour = now.getHours();
 const minute = now.getMinutes();
 
-// Night = 21:00 → 06:00
-const isNight = (hour >= 21 || hour < 6);
+// Night = 20:20 → 06:00
+const isNight = (
+    hour > 20 || 
+    (hour === 20 && minute >= 20) || 
+    hour < 6
+);
+
 
 
     const chosenBackground = isNight
