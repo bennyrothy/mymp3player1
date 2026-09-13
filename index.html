@@ -1695,8 +1695,23 @@ if (playlist.length > 0) {
 
     updateMp3Title(entry.name);
 
-    audio.src = fixPath(entry.url);
-    audio.volume = volSlider.value / 100;
+    const nextUrl = fixPath(entry.url);
+
+    /* ⭐⭐⭐ INSTANT SWITCHING + NO INTRO CUT ⭐⭐⭐ */
+
+    // Pre-decode the next track
+    audio.src = nextUrl;
+    audio.preload = "auto";
+    audio.load();
+
+    // Warm the audio pipeline (does NOT cut the intro)
+    const realVolume = volSlider.value / 100;
+    audio.volume = 0;
+    audio.play().catch(() => {});
+    audio.pause();
+    audio.volume = realVolume;
+
+    /* ⭐⭐⭐ ACTUAL PLAYBACK ⭐⭐⭐ */
 
     audio.play()
         .then(() => {
@@ -1714,6 +1729,7 @@ if (playlist.length > 0) {
             mp3PlayPause.textContent = "▶";
         });
 }
+
 
 
 function playPreviousMp3(mode) {
