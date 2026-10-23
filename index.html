@@ -1423,24 +1423,23 @@ const radioItems = [
        SHUFFLE ENGINE
        =========================== */
 
-    const shuffleState = {
-        mp3_1: { order: [], index: 0 },
-        mp3_2: { order: [], index: 0 }
-    };
+const shuffleState = {
+    mp3_1: { order: [], index: 0 },
+    mp3_2: { order: [], index: 0 }
+};
 
-    function getShuffleKey(mode) {
-        return mode === MODE_MP3_1 ? "mp3_1" : "mp3_2";
+function getShuffleKey(mode) {
+    return mode === MODE_MP3_1 ? "mp3_1" : "mp3_2";
+}
+
+function buildShuffleOrder(length) {
+    const arr = [...Array(length).keys()];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-
-
-    function buildShuffleOrder(length) {
-        const arr = [...Array(length).keys()];
-        for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-    }
+    return arr;
+}
 
 function isFirstTrack(mode) {
     const key = getShuffleKey(mode);
@@ -1448,193 +1447,178 @@ function isFirstTrack(mode) {
     return state.index === 0;
 }
 
-
-    function ensureShuffle(mode) {
+function ensureShuffle(mode) {
     const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
     const key = getShuffleKey(mode);
     const state = shuffleState[key];
 
     if (!playlist.length) {
         state.order = [];
-        state.index = -1;   // ⭐ no tracks played
+        state.index = -1;
         return;
     }
 
     if (state.order.length !== playlist.length) {
         state.order = buildShuffleOrder(playlist.length);
-        state.index = -1;   // ⭐ first track not chosen yet
+        state.index = -1;
         return;
     }
 
     if (state.index >= state.order.length) {
         state.order = buildShuffleOrder(playlist.length);
-        state.index = -1;   // ⭐ reset to “no track played”
+        state.index = -1;
     }
 }
 
-
-    function updateMp3Title(filename) {
-        if (typeof filename !== "string") {
-            console.warn("Invalid filename passed to updateMp3Title:", filename);
-            radioScreenLine1.textContent =
-                currentMode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
-            radioScreenLine2.textContent = "INVALID FILE";
-            return;
-        }
-
-        let clean = filename.replace(/\.mp3$/i, "");
-        clean = clean.replace(/^.*?\//, "");
-
+function updateMp3Title(filename) {
+    if (typeof filename !== "string") {
+        console.warn("Invalid filename passed to updateMp3Title:", filename);
         radioScreenLine1.textContent =
             currentMode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
-        radioScreenLine1.classList.remove("live-red");
-        radioScreenLine1.classList.remove("mp3-title");
-
-        radioScreenLine2.textContent = clean;
-        radioScreenLine2.classList.add("mp3-title");
+        radioScreenLine2.textContent = "INVALID FILE";
+        return;
     }
 
-    function getNextTrack(mode) {
+    let clean = filename.replace(/\.mp3$/i, "");
+    clean = clean.replace(/^.*?\//, "");
+
+    radioScreenLine1.textContent =
+        currentMode === MODE_MP3_1 ? "MP3 PLAYER 1" : "MP3 PLAYER 2";
+    radioScreenLine1.classList.remove("live-red");
+    radioScreenLine1.classList.remove("mp3-title");
+
+    radioScreenLine2.textContent = clean;
+    radioScreenLine2.classList.add("mp3-title");
+}
+
+function getNextTrack(mode) {
     ensureShuffle(mode);
     const key = getShuffleKey(mode);
     const state = shuffleState[key];
 
     if (!state.order.length) return null;
 
-    // ⭐ If this is the very first track, DO NOT increment
     if (state.index === -1) {
         state.index = 0;
         return state.order[state.index];
     }
 
-    // ⭐ Normal behaviour after the first track
     state.index++;
     if (state.index >= state.order.length) state.index = 0;
 
     return state.order[state.index];
 }
 
-
-    function fixPath(path) {
-        return encodeURI(path);
-    }
-
-    function updateSonyHeader(line1, line2, flicker = false) {
-        radioScreenLine1.textContent = line1;
-        radioScreenLine2.textContent = line2;
-
-        if (flicker) {
-            radioScreenLine1.classList.remove("flicker");
-            radioScreenLine2.classList.remove("flicker");
-            void radioScreenLine1.offsetWidth;
-            void radioScreenLine2.offsetWidth;
-            radioScreenLine1.classList.add("flicker");
-            radioScreenLine2.classList.add("flicker");
-        }
-    }
-
-    function getCurrentAudio() {
-        if (currentMode === MODE_RADIO) return audioRadio;
-        if (currentMode === MODE_MP3_1) return audioMp3_1;
-        if (currentMode === MODE_MP3_2) return audioMp3_2;
-        return null;
-    }
-
-    function fadeIn(audio, duration = 0.15) {
-        const target = Math.round(parseInt(volSlider.value) / 10) * 10 / 100;
-        const start = audio.volume;
-        const step = (target - start) / (duration * 60);
-
-        const fade = setInterval(() => {
-            audio.volume = Math.min(target, audio.volume + step);
-            if (audio.volume >= target) clearInterval(fade);
-        }, 16);
-    }
-
-    function updateBarAnimation() {
-        const bars = document.querySelector(".led-bars");
-        if (isPlaying) {
-            bars.classList.add("playing");
-        } else {
-            bars.classList.remove("playing");
-        }
-    }
-
-    function playRadio(index) {
-        currentRadioIndex = (index + radioItems.length) % radioItems.length;
-        const station = radioItems[currentRadioIndex];
-
-        updateSonyHeader(station.name, "LIVE", true);
-       radioScreenLine2.classList.remove("mp3-title");
-radioScreenLine2.classList.add("live-red");
-
-
-       
-
-        audioRadio.src = station.url;
-
-        const targetVolume = volSlider.value / 100;
-        
-
-        if (station.name === "Atlantic Radio UK") {
-            setPlayIcon(false);
-            audioRadio.volume = 0;
-
-            audioRadio.play().then(() => {
-                isPlaying = true;
-                updateBarAnimation();
-                ledVol.classList.add("playing");
-
-                setTimeout(() => {
-                    audioRadio.volume = targetVolume;
-                    setPlayIcon(true);
-                }, 3000);
-            }).catch(() => {
-                isPlaying = false;
-                updateBarAnimation();
-                setPlayIcon(false);
-                ledVol.classList.remove("playing");
-            });
-
-        } else {
-            audioRadio.volume = targetVolume;
-
-            audioRadio.play().then(() => {
-                isPlaying = true;
-                updateBarAnimation();
-                setPlayIcon(true);
-                fadeIn(audioRadio);
-                ledVol.classList.add("playing");
-            }).catch(() => {
-                isPlaying = false;
-                updateBarAnimation();
-                setPlayIcon(false);
-                ledVol.classList.remove("playing");
-            });
-        }
-
-        audioRadio.onpause = () => {
-            isPlaying = false;
-            updateBarAnimation();
-            ledVol.classList.remove("playing");
-        };
-    }
-
-    function setPlayIcon(playing) {
-    btnPlayPause.textContent = playing ? "⏸" : "▶";
+function fixPath(path) {
+    return encodeURI(path);
 }
 
+function updateSonyHeader(line1, line2, flicker = false) {
+    radioScreenLine1.textContent = line1;
+    radioScreenLine2.textContent = line2;
 
-    function stopAll() {
-        audioRadio.pause();
-        audioMp3_1.pause();
-        audioMp3_2.pause();
+    if (flicker) {
+        radioScreenLine1.classList.remove("flicker");
+        radioScreenLine2.classList.remove("flicker");
+        void radioScreenLine1.offsetWidth;
+        void radioScreenLine2.offsetWidth;
+        radioScreenLine1.classList.add("flicker");
+        radioScreenLine2.classList.add("flicker");
+    }
+}
+
+function getCurrentAudio() {
+    if (currentMode === MODE_RADIO) return audioRadio;
+    if (currentMode === MODE_MP3_1) return audioMp3_1;
+    if (currentMode === MODE_MP3_2) return audioMp3_2;
+    return null;
+}
+
+function fadeIn(audio, duration = 0.15) {
+    const target = Math.round(parseInt(volSlider.value) / 10) * 10 / 100;
+    const start = audio.volume;
+    const step = (target - start) / (duration * 60);
+
+    const fade = setInterval(() => {
+        audio.volume = Math.min(target, audio.volume + step);
+        if (audio.volume >= target) clearInterval(fade);
+    }, 16);
+}
+
+function updateBarAnimation() {
+    const bars = document.querySelector(".led-bars");
+    if (isPlaying) {
+        bars.classList.add("playing");
+    } else {
+        bars.classList.remove("playing");
+    }
+}
+
+/* ===========================
+       RADIO SWITCHING
+       =========================== */
+
+function playRadio(index) {
+    currentRadioIndex = (index + radioItems.length) % radioItems.length;
+    const station = radioItems[currentRadioIndex];
+
+    updateSonyHeader(station.name, "LIVE", true);
+    radioScreenLine2.classList.remove("mp3-title");
+    radioScreenLine2.classList.add("live-red");
+
+    audioRadio.src = station.url;
+    audioRadio.preload = "auto";
+    audioRadio.load();
+    audioRadio.currentTime = 0;
+
+    const targetVolume = volSlider.value / 100;
+    audioRadio.volume = 0;
+
+    // Warm pipeline
+    audioRadio.play().catch(() => {});
+    audioRadio.pause();
+    audioRadio.volume = targetVolume;
+
+    audioRadio.addEventListener("canplaythrough", () => {
+        audioRadio.play().then(() => {
+            isPlaying = true;
+            updateBarAnimation();
+            setPlayIcon(true);
+            fadeIn(audioRadio, 0.15); // faster fade
+            ledVol.classList.add("playing");
+        }).catch(() => {
+            isPlaying = false;
+            updateBarAnimation();
+            setPlayIcon(false);
+            ledVol.classList.remove("playing");
+        });
+    }, { once: true });
+
+    audioRadio.onpause = () => {
         isPlaying = false;
         updateBarAnimation();
         ledVol.classList.remove("playing");
-    }
+    };
+}
 
-    function switchMode(mode) {
+/* ===========================
+       MODE SWITCHING
+       =========================== */
+
+function setPlayIcon(playing) {
+    btnPlayPause.textContent = playing ? "⏸" : "▶";
+}
+
+function stopAll() {
+    audioRadio.pause();
+    audioMp3_1.pause();
+    audioMp3_2.pause();
+    isPlaying = false;
+    updateBarAnimation();
+    ledVol.classList.remove("playing");
+}
+
+function switchMode(mode) {
     if (mode === currentMode) return;
 
     stopAll();
@@ -1661,7 +1645,6 @@ radioScreenLine2.classList.add("live-red");
         updateSonyHeader("LOADING", "LIVE", true);
         radioScreenLine2.classList.add("live-red");
 
-
         playRadio(currentRadioIndex);
 
     } else {
@@ -1681,25 +1664,27 @@ radioScreenLine2.classList.add("live-red");
         audioRadio.pause();
         audioRadio.src = "";
 
-        // ⭐ THIS WAS MISSING — resets track position so PREV is disabled
         mp3TrackNumber = 0;
 
         const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
 
-if (playlist.length > 0) {
-    playNextMp3(mode);
-} else {
-    updateSonyHeader(
-        mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
-        "ADD PLAYLIST",
-        true
-    );
-}
-
+        if (playlist.length > 0) {
+            playNextMp3(mode);
+        } else {
+            updateSonyHeader(
+                mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
+                "ADD PLAYLIST",
+                true
+            );
+        }
     }
 }
 
-   function playNextMp3(mode) {
+/* ===========================
+       MP3 SWITCHING
+       =========================== */
+
+function playNextMp3(mode) {
     const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
     const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
 
@@ -1718,70 +1703,123 @@ if (playlist.length > 0) {
     updateMp3Title(entry.name);
 
     const nextUrl = fixPath(entry.url);
-
-    /* ⭐⭐⭐ INSTANT SWITCHING + NO INTRO CUT ⭐⭐⭐ */
-
     // Pre-decode the next track
     audio.src = nextUrl;
     audio.preload = "auto";
     audio.load();
+    audio.currentTime = 0;
 
-    // Warm the audio pipeline (does NOT cut the intro)
+    // Warm pipeline
     const realVolume = volSlider.value / 100;
     audio.volume = 0;
     audio.play().catch(() => {});
     audio.pause();
     audio.volume = realVolume;
 
-    /* ⭐⭐⭐ ACTUAL PLAYBACK ⭐⭐⭐ */
+    // Preload NEXT and PREV tracks in background
+    function preloadAudio(url) {
+        if (!url) return;
+        const temp = new Audio();
+        temp.src = url;
+        temp.preload = "auto";
+        temp.load();
+    }
+    preloadAudio(fixPath(playlist[nextIndex + 1]?.url));
+    preloadAudio(fixPath(playlist[nextIndex - 1]?.url));
 
-    audio.play()
-        .then(() => {
-            isPlaying = true;
-            updateBarAnimation();
-            ledVol.classList.add("playing");
-            mp3PlayPause.textContent = "⏸";
-
-            mp3TrackNumber++;   // ⭐ correct place
-        })
-        .catch(() => {
-            isPlaying = false;
-            updateBarAnimation();
-            ledVol.classList.remove("playing");
-            mp3PlayPause.textContent = "▶";
-        });
+    audio.addEventListener("canplaythrough", () => {
+        audio.play()
+            .then(() => {
+                isPlaying = true;
+                updateBarAnimation();
+                ledVol.classList.add("playing");
+                mp3PlayPause.textContent = "⏸";
+                mp3TrackNumber++;
+            })
+            .catch(() => {
+                isPlaying = false;
+                updateBarAnimation();
+                ledVol.classList.remove("playing");
+                mp3PlayPause.textContent = "▶";
+            });
+    }, { once: true });
 }
-
-
 
 function playPreviousMp3(mode) {
     const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
     const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
 
-    if (!playlist.length) return;
+    if (!playlist.length) {
+        updateSonyHeader(
+            mode === MODE_MP3_1 ? "NO TRACKS IN MP3 1" : "NO TRACKS IN MP3 2",
+            "ADD PLAYLIST",
+            true
+        );
+        return;
+    }
+
+    // ⛔ Block Prev on the very first track
+    if (isFirstTrack(mode)) {
+        return;
+    }
 
     const key = getShuffleKey(mode);
     const state = shuffleState[key];
 
     if (!state.order.length) ensureShuffle(mode);
 
-    // ⭐ If we're at the first track, do nothing
-    if (state.index <= 0) {
-        return;
-    }
-
-    // Move back one track
     state.index--;
+    if (state.index < 0) state.index = state.order.length - 1;
 
     const prevIndex = state.order[state.index];
     const entry = playlist[prevIndex];
 
     updateMp3Title(entry.name);
 
-    audio.src = fixPath(entry.url);
-    audio.volume = volSlider.value / 100;
-    audio.play();
+    const prevUrl = fixPath(entry.url);
+
+    // Pre-decode the previous track
+    audio.src = prevUrl;
+    audio.preload = "auto";
+    audio.load();
+    audio.currentTime = 0;
+
+    // Warm pipeline
+    const realVolume = volSlider.value / 100;
+    audio.volume = 0;
+    audio.play().catch(() => {});
+    audio.pause();
+    audio.volume = realVolume;
+
+    // Preload surrounding tracks
+    function preloadAudio(url) {
+        if (!url) return;
+        const temp = new Audio();
+        temp.src = url;
+        temp.preload = "auto";
+        temp.load();
+    }
+    preloadAudio(fixPath(playlist[prevIndex - 1]?.url));
+    preloadAudio(fixPath(playlist[prevIndex + 1]?.url));
+
+    audio.addEventListener("canplaythrough", () => {
+        audio.play()
+            .then(() => {
+                isPlaying = true;
+                updateBarAnimation();
+                ledVol.classList.add("playing");
+                mp3PlayPause.textContent = "⏸";
+            })
+            .catch(() => {
+                isPlaying = false;
+                updateBarAnimation();
+                ledVol.classList.remove("playing");
+                mp3PlayPause.textContent = "▶";
+            });
+    }, { once: true });
 }
+
+
 
 
    
