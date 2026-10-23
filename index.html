@@ -1579,7 +1579,7 @@ function playRadio(index) {
     audioRadio.pause();
     audioRadio.volume = targetVolume;
 
-    audioRadio.addEventListener("canplaythrough", () => {
+    
         audioRadio.play().then(() => {
             isPlaying = true;
             updateBarAnimation();
@@ -1592,7 +1592,7 @@ function playRadio(index) {
             setPlayIcon(false);
             ledVol.classList.remove("playing");
         });
-    }, { once: true });
+   
 
     audioRadio.onpause = () => {
         isPlaying = false;
@@ -1727,22 +1727,22 @@ function playNextMp3(mode) {
     preloadAudio(fixPath(playlist[nextIndex + 1]?.url));
     preloadAudio(fixPath(playlist[nextIndex - 1]?.url));
 
-    audio.addEventListener("canplaythrough", () => {
-        audio.play()
-            .then(() => {
-                isPlaying = true;
-                updateBarAnimation();
-                ledVol.classList.add("playing");
-                mp3PlayPause.textContent = "⏸";
-                mp3TrackNumber++;
-            })
-            .catch(() => {
-                isPlaying = false;
-                updateBarAnimation();
-                ledVol.classList.remove("playing");
-                mp3PlayPause.textContent = "▶";
-            });
-    }, { once: true });
+    audio.play()
+    .then(() => {
+        isPlaying = true;
+        updateBarAnimation();
+        ledVol.classList.add("playing");
+        mp3PlayPause.textContent = "⏸";
+        mp3TrackNumber++;
+    })
+    .catch(() => {
+        isPlaying = false;
+        updateBarAnimation();
+        ledVol.classList.remove("playing");
+        mp3PlayPause.textContent = "▶";
+    });
+
+    
 }
 
 function playPreviousMp3(mode) {
@@ -1802,7 +1802,7 @@ function playPreviousMp3(mode) {
     preloadAudio(fixPath(playlist[prevIndex - 1]?.url));
     preloadAudio(fixPath(playlist[prevIndex + 1]?.url));
 
-    audio.addEventListener("canplaythrough", () => {
+    
         audio.play()
             .then(() => {
                 isPlaying = true;
@@ -1816,7 +1816,7 @@ function playPreviousMp3(mode) {
                 ledVol.classList.remove("playing");
                 mp3PlayPause.textContent = "▶";
             });
-    }, { once: true });
+    
 }
 
 
