@@ -419,9 +419,13 @@ html, body {
 
   /* Song title smaller on mobile (radio + mp3) */
   .radio-screen-line2,
+  .radio-screen-line2.mp3-title,
   .mp3-title {
     font-size: 0.5rem !important;   /* consistent small text */
     line-height: 1.1 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Volume row */
@@ -453,7 +457,9 @@ html, body {
 
   .mp3ControlsRow button,
   .transport-btn,
-  .mp3-circle-btn {
+  .mp3-circle-btn,
+  .control-btn,
+  .vol-btn {
     font-size: 1rem;
     min-height: 44px;
     padding: 0.9rem;
@@ -475,23 +481,40 @@ html, body {
   }
 
   /* Remove orange focus/active highlight + grey overlay */
+  button:focus,
+  button:active,
   .mp3-circle-btn:focus,
-  .mp3-circle-btn:active {
+  .mp3-circle-btn:active,
+  .control-btn:focus,
+  .control-btn:active,
+  .transport-btn:focus,
+  .transport-btn:active,
+  .vol-btn:focus,
+  .vol-btn:active {
     outline: none !important;
     box-shadow: none !important;
     background: inherit !important;
     color: inherit !important;
     opacity: 1 !important;
+    -webkit-focus-ring-color: transparent !important;
   }
 
   /* Prevent iOS/Android tap highlight */
-  .mp3-circle-btn {
+  button,
+  .mp3-circle-btn,
+  .control-btn,
+  .transport-btn,
+  .vol-btn {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Kill WebKit orange focus ring */
-  .mp3-circle-btn::-moz-focus-inner { border: 0 !important; }
-  .mp3-circle-btn:focus { -webkit-focus-ring-color: transparent !important; }
+  /* Kill Firefox inner focus border */
+  .mp3-circle-btn::-moz-focus-inner,
+  .control-btn::-moz-focus-inner,
+  .transport-btn::-moz-focus-inner,
+  .vol-btn::-moz-focus-inner {
+    border: 0 !important;
+  }
 }
 </style>
 </head>
