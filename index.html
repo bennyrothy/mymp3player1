@@ -417,20 +417,34 @@ html, body {
     padding: 0.5rem;
   }
 
+  /* Song title smaller only on mobile */
+  .mp3-title {
+    font-size: 0.85rem;   /* adjust size to taste */
+  }
+
   /* Volume row */
   .volume-row {
-    flex-direction: column;   /* stack volume controls vertically */
+    flex-direction: row;   /* keep buttons side by side */
+    justify-content: space-between;
     gap: 10px;
   }
 
   .vol-btn {
-    width: 100%;              /* full width buttons for thumb use */
-    font-size: 1.1rem;
-    min-height: 44px;
+    flex: 1;               /* equal width buttons */
+    font-size: 0.9rem;     /* smaller text */
+    min-height: 40px;
+  }
+
+  /* Swap Vol+ ahead of Vol- */
+  .vol-btn.vol-plus {
+    order: 1;
+  }
+  .vol-btn.vol-minus {
+    order: 2;
   }
 
   .vol-slider {
-    width: 100%;              /* slider stretches across screen */
+    width: 100%;           /* slider stretches across screen */
   }
 
   /* Transport row */
@@ -443,9 +457,9 @@ html, body {
 
   .mp3ControlsRow button,
   .transport-btn {
-    width: 100%;              /* full width for thumb use */
+    width: 100%;           
     font-size: 1.1rem;
-    min-height: 48px;         /* bigger tap targets */
+    min-height: 48px;      
     padding: 1rem;
   }
 
@@ -468,8 +482,15 @@ html, body {
     font-size: clamp(1rem, 5vw, 1.4rem);
     text-align: center;
   }
-}
 
+  /* Remove orange focus/active highlight on transport buttons */
+  .mp3-circle-btn:focus,
+  .mp3-circle-btn:active {
+    outline: none;
+    box-shadow: none;
+    background: none;
+  }
+}
 </style>
 </head>
 
@@ -524,24 +545,22 @@ html, body {
 
     <div class="transport-row">
     <button id="btnPrev" class="mp3-circle-btn">⏮</button>
-
     <button id="btnPlayPause" class="mp3-circle-btn">▶</button>
-
     <button id="btnNext" class="mp3-circle-btn">⏭</button>
 </div>
 
+<div class="volume-row">
+    <button id="volDown" class="vol-btn vol-minus">VOL −</button>
+    <input id="volSlider" type="range" min="0" max="100" value="50" class="vol-slider">
+    <button id="volUp" class="vol-btn vol-plus">VOL +</button>
+</div>
 
-    <div class="volume-row">
-        <button id="volDown" class="vol-btn">VOL −</button>
-        <input id="volSlider" type="range" min="0" max="100" value="50" class="vol-slider">
-        <button id="volUp" class="vol-btn">VOL +</button>
-    </div>
-
-    <audio id="audioRadio"></audio>
-    <audio id="audioMp3_1"></audio>
-    <audio id="audioMp3_2"></audio>
+<audio id="audioRadio"></audio>
+<audio id="audioMp3_1"></audio>
+<audio id="audioMp3_2"></audio>
 
 </div> <!-- END OF PLAYER SHELL -->
+
 
      
 <script>
