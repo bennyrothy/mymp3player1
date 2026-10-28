@@ -417,10 +417,11 @@ html, body {
     padding: 0.5rem;
   }
 
-  /* Song title smaller only on mobile */
-  .radio-screen-line2 {
+  /* Song title smaller on mobile (radio + mp3) */
+  .radio-screen-line2,
+  .mp3-title {
     font-size: 0.45rem;   /* extra small text */
-    line-height: 1.1;     /* tighter spacing */
+    line-height: 1.1;
   }
 
   /* Volume row */
@@ -432,8 +433,8 @@ html, body {
 
   .vol-btn {
     flex: 1;
-    font-size: 0.9rem;
-    min-height: 40px;
+    font-size: 0.85rem;    /* slightly smaller button text */
+    min-height: 36px;
   }
 
   /* Swap Vol+ ahead of Vol- */
@@ -446,7 +447,7 @@ html, body {
 
   /* Hide volume slider on mobile */
   .vol-slider {
-    display: none;
+    display: none !important;
   }
 
   /* Transport row stays horizontal */
@@ -459,15 +460,15 @@ html, body {
   .mp3ControlsRow button,
   .transport-btn,
   .mp3-circle-btn {
-    font-size: 1.1rem;
-    min-height: 48px;
-    padding: 1rem;
+    font-size: 1rem;
+    min-height: 44px;
+    padding: 0.9rem;
   }
 
   /* Bigger icons */
   .transport-btn svg {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
 
   /* LED bars */
