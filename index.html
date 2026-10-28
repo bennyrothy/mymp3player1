@@ -418,8 +418,8 @@ html, body {
   }
 
   /* Song title smaller only on mobile */
-  .mp3-title {
-    font-size: 0.85rem;   /* adjust size to taste */
+  .radio-screen-line2 {
+    font-size: 0.85rem;   /* shrink song name */
   }
 
   /* Volume row */
@@ -443,23 +443,23 @@ html, body {
     order: 2;
   }
 
+  /* Hide volume slider on mobile */
   .vol-slider {
-    width: 100%;           /* slider stretches across screen */
+    display: none;
   }
 
-  /* Transport row */
-  .mp3ControlsRow,
+  /* Transport row stays horizontal */
   .transport-row {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    justify-content: center;
     gap: 0.75rem;
   }
 
   .mp3ControlsRow button,
-  .transport-btn {
-    width: 100%;           
+  .transport-btn,
+  .mp3-circle-btn {
     font-size: 1.1rem;
-    min-height: 48px;      
+    min-height: 48px;
     padding: 1rem;
   }
 
@@ -477,8 +477,7 @@ html, body {
   }
 
   /* Header text */
-  .radio-screen-line1,
-  .radio-screen-line2 {
+  .radio-screen-line1 {
     font-size: clamp(1rem, 5vw, 1.4rem);
     text-align: center;
   }
