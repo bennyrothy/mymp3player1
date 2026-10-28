@@ -419,7 +419,7 @@ html, body {
 
   /* Song title smaller only on mobile */
   .radio-screen-line2 {
-    font-size: 0.85rem;   /* shrink song name */
+    font-size: 0.75rem;   /* smaller text size */
   }
 
   /* Volume row */
@@ -430,8 +430,8 @@ html, body {
   }
 
   .vol-btn {
-    flex: 1;               /* equal width buttons */
-    font-size: 0.9rem;     /* smaller text */
+    flex: 1;
+    font-size: 0.9rem;
     min-height: 40px;
   }
 
@@ -478,16 +478,23 @@ html, body {
 
   /* Header text */
   .radio-screen-line1 {
-    font-size: clamp(1rem, 5vw, 1.4rem);
+    font-size: clamp(1rem, 5vw, 1.2rem);
     text-align: center;
   }
 
-  /* Remove orange focus/active highlight on transport buttons */
+  /* Remove orange focus/active highlight + grey overlay */
   .mp3-circle-btn:focus,
   .mp3-circle-btn:active {
     outline: none;
     box-shadow: none;
-    background: none;
+    background: inherit;
+    color: inherit;
+    opacity: 1;
+  }
+
+  /* Prevent iOS/Android tap highlight */
+  .mp3-circle-btn {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 </style>
