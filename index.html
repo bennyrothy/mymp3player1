@@ -18,8 +18,6 @@
 <link rel="preload" href="backgrounds/bg_night1.png" as="image" fetchpriority="high">
 <link rel="preload" href="backgrounds/bg_night2.png" as="image" fetchpriority="high">
 
-
-
 <style>
 :root {
     --bg-main: #050608;
@@ -69,24 +67,17 @@ html, body {
     overflow: hidden;
 }
 
-
 .radio-screen {
     width: 100%;
-    background: transparent; /* keep your transparent background */
-
+    background: transparent;
     border-radius: 10px;
     padding: 14px 16px;
     text-align: center;
     margin-bottom: 12px;
     min-height: 90px;
-
-    /* remove red glow + red border */
     box-shadow: none;
-
     box-sizing: border-box;
 }
-
-
 
 /* MAIN LED TEXT */
 .radio-screen-line1,
@@ -105,10 +96,10 @@ html, body {
     white-space: nowrap;
 }
 
-/* SMALLER MP3 TITLE */
+/* MP3 TITLE */
 .radio-screen-line2.mp3-title {
-    font-size: 18px;
-    line-height: 18px;
+    font-size: 22px; /* bigger text */
+    line-height: 22px;
     letter-spacing: 0.05em;
     color: #ffb15a !important;
     text-shadow:
@@ -411,12 +402,12 @@ html, body {
    MOBILE OVERRIDES – FINAL FIX
    =========================== */
 @media (max-width: 600px) {
-  /* Song title smaller on mobile (radio + mp3) */
+  /* Song title bigger on mobile (radio + mp3) */
   .radio-screen-line2,
   .radio-screen-line2.mp3-title,
   .mp3-title {
-    font-size: 0.5rem !important;
-    line-height: 1.1 !important;
+    font-size: 22px !important;   /* keep it big */
+    line-height: 1.3 !important;
     display: block;
     width: 100%;
     text-align: center;
