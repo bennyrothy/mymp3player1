@@ -399,15 +399,15 @@ html, body {
 }
 
 /* ===========================
-   MOBILE OVERRIDES – FINAL FIX
+   MOBILE OVERRIDES – CLEAN FIX
    =========================== */
 @media (max-width: 600px) {
-  /* Song title bigger on mobile (radio + mp3) */
+  /* Song title balanced size on mobile */
   .radio-screen-line2,
   .radio-screen-line2.mp3-title,
   .mp3-title {
-    font-size: 22px !important;   /* keep it big */
-    line-height: 1.3 !important;
+    font-size: 16px !important;   /* readable but not oversized */
+    line-height: 1.2 !important;
     display: block;
     width: 100%;
     text-align: center;
@@ -420,37 +420,39 @@ html, body {
   .vol-slider { display: none !important; }
 
   /* Remove orange focus ring + glass overlay globally */
+  button,
+  .control-btn,
+  .mp3-circle-btn,
+  .transport-btn,
+  .vol-btn {
+    -webkit-tap-highlight-color: transparent;
+    appearance: none !important;          /* kill browser default styles */
+    -webkit-appearance: none !important;  /* Safari/iOS */
+    -moz-appearance: none !important;     /* Firefox */
+  }
+
   button:focus,
   button:active,
-  .mp3-circle-btn:focus,
-  .mp3-circle-btn:active,
   .control-btn:focus,
   .control-btn:active,
+  .mp3-circle-btn:focus,
+  .mp3-circle-btn:active,
   .transport-btn:focus,
   .transport-btn:active,
   .vol-btn:focus,
   .vol-btn:active {
     outline: none !important;
     box-shadow: none !important;
-    background: inherit !important;
+    background: none !important;   /* force no overlay */
     color: inherit !important;
     opacity: 1 !important;
     -webkit-focus-ring-color: transparent !important;
   }
 
-  /* Prevent iOS/Android tap highlight */
-  button,
-  .mp3-circle-btn,
-  .control-btn,
-  .transport-btn,
-  .vol-btn {
-    -webkit-tap-highlight-color: transparent;
-  }
-
   /* Kill Firefox inner focus border */
   button::-moz-focus-inner,
-  .mp3-circle-btn::-moz-focus-inner,
   .control-btn::-moz-focus-inner,
+  .mp3-circle-btn::-moz-focus-inner,
   .transport-btn::-moz-focus-inner,
   .vol-btn::-moz-focus-inner {
     border: 0 !important;
