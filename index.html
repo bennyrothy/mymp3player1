@@ -399,16 +399,15 @@ html, body {
 }
 
 /* ===========================
-   MOBILE OVERRIDES – CLEAN FIX
+   MOBILE OVERRIDES – CLEAN RESET
    =========================== */
 @media (max-width: 600px) {
-  /* Song title balanced size on mobile */
+  /* Song title smaller on mobile */
   .radio-screen-line2,
   .radio-screen-line2.mp3-title,
   .mp3-title {
-    font-size: 16px !important;   /* readable but not oversized */
+    font-size: 14px !important;   /* smaller than desktop */
     line-height: 1.2 !important;
-    display: block;
     width: 100%;
     text-align: center;
     white-space: nowrap;
@@ -419,44 +418,9 @@ html, body {
   /* Hide volume slider on mobile */
   .vol-slider { display: none !important; }
 
-  /* Remove orange focus ring + glass overlay globally */
-  button,
-  .control-btn,
-  .mp3-circle-btn,
-  .transport-btn,
-  .vol-btn {
-    -webkit-tap-highlight-color: transparent;
-    appearance: none !important;          /* kill browser default styles */
-    -webkit-appearance: none !important;  /* Safari/iOS */
-    -moz-appearance: none !important;     /* Firefox */
-  }
-
-  button:focus,
-  button:active,
-  .control-btn:focus,
-  .control-btn:active,
-  .mp3-circle-btn:focus,
-  .mp3-circle-btn:active,
-  .transport-btn:focus,
-  .transport-btn:active,
-  .vol-btn:focus,
-  .vol-btn:active {
-    outline: none !important;
-    box-shadow: none !important;
-    background: none !important;   /* force no overlay */
-    color: inherit !important;
-    opacity: 1 !important;
-    -webkit-focus-ring-color: transparent !important;
-  }
-
-  /* Kill Firefox inner focus border */
-  button::-moz-focus-inner,
-  .control-btn::-moz-focus-inner,
-  .mp3-circle-btn::-moz-focus-inner,
-  .transport-btn::-moz-focus-inner,
-  .vol-btn::-moz-focus-inner {
-    border: 0 !important;
-  }
+  /* Swap Vol+ ahead of Vol- */
+  .vol-btn.vol-plus { order: 1; }
+  .vol-btn.vol-minus { order: 2; }
 }
 </style>
 </head>
