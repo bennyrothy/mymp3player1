@@ -421,24 +421,28 @@ html, body {
   .radio-screen-line2,
   .radio-screen-line2.mp3-title,
   .mp3-title {
-    font-size: 0.5rem !important;   /* consistent small text */
+    font-size: 0.5rem !important;
     line-height: 1.1 !important;
+    display: block;
+    width: 100%;              /* stretch full width */
+    text-align: center;       /* keep centered */
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis;  /* cut off long names cleanly */
   }
 
   /* Volume row */
   .volume-row {
     flex-direction: row;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
   }
 
   .vol-btn {
     flex: 1;
-    font-size: 0.85rem;
-    min-height: 36px;
+    font-size: 0.75rem;       /* smaller text */
+    min-height: 28px;         /* smaller height */
+    max-width: 60px;          /* narrower buttons */
   }
 
   /* Swap Vol+ ahead of Vol- */
@@ -461,8 +465,8 @@ html, body {
   .control-btn,
   .vol-btn {
     font-size: 1rem;
-    min-height: 44px;
-    padding: 0.9rem;
+    min-height: 40px;
+    padding: 0.8rem;
   }
 
   /* Bigger icons */
