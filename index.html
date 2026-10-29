@@ -408,15 +408,9 @@ html, body {
 }
 
 /* ===========================
-   MOBILE OVERRIDES
+   MOBILE OVERRIDES – FINAL FIX
    =========================== */
 @media (max-width: 600px) {
-  body {
-    font-size: 1rem;
-    line-height: 1.4;
-    padding: 0.5rem;
-  }
-
   /* Song title smaller on mobile (radio + mp3) */
   .radio-screen-line2,
   .radio-screen-line2.mp3-title,
@@ -424,67 +418,17 @@ html, body {
     font-size: 0.5rem !important;
     line-height: 1.1 !important;
     display: block;
-    width: 100%;              /* stretch full width */
-    text-align: center;       /* keep centered */
+    width: 100%;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;  /* cut off long names cleanly */
+    text-overflow: ellipsis;
   }
-
-  /* Volume row */
-  .volume-row {
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  .vol-btn {
-    flex: 1;
-    font-size: 0.75rem;       /* smaller text */
-    min-height: 28px;         /* smaller height */
-    max-width: 60px;          /* narrower buttons */
-  }
-
-  /* Swap Vol+ ahead of Vol- */
-  .vol-btn.vol-plus { order: 1; }
-  .vol-btn.vol-minus { order: 2; }
 
   /* Hide volume slider on mobile */
   .vol-slider { display: none !important; }
 
-  /* Transport row stays horizontal */
-  .transport-row {
-    flex-direction: row;
-    justify-content: center;
-    gap: 0.75rem;
-  }
-
-  .mp3ControlsRow button,
-  .transport-btn,
-  .mp3-circle-btn,
-  .control-btn,
-  .vol-btn {
-    font-size: 1rem;
-    min-height: 40px;
-    padding: 0.8rem;
-  }
-
-  /* Bigger icons */
-  .transport-btn svg { width: 26px; height: 26px; }
-
-  /* LED bars */
-  .led-bars {
-    transform: scale(1.3);
-    margin: 1rem 0;
-  }
-
-  /* Header text */
-  .radio-screen-line1 {
-    font-size: clamp(0.8rem, 3.5vw, 1rem);
-    text-align: center;
-  }
-
-  /* Remove orange focus/active highlight + grey overlay */
+  /* Remove orange focus ring + glass overlay globally */
   button:focus,
   button:active,
   .mp3-circle-btn:focus,
@@ -513,6 +457,7 @@ html, body {
   }
 
   /* Kill Firefox inner focus border */
+  button::-moz-focus-inner,
   .mp3-circle-btn::-moz-focus-inner,
   .control-btn::-moz-focus-inner,
   .transport-btn::-moz-focus-inner,
