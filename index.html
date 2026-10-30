@@ -404,6 +404,19 @@ html, body {
    MOBILE OVERRIDES – CLEAN RESET
    =========================== */
 @media (max-width: 600px) {
+  /* Song title smaller on mobile */
+  .radio-screen-line2,
+  .radio-screen-line2.mp3-title,
+  .mp3-title {
+    font-size: 14px !important;   /* smaller than desktop */
+    line-height: 1.2 !important;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* Hide volume slider on mobile */
   .vol-slider { display: none !important; }
 
@@ -415,6 +428,9 @@ html, body {
 </head>
 
 <body>
+
+<audio id="audio" preload="none"></audio>
+<audio id="audioRadio" preload="none"></audio>
 
 <div id="bg"></div>
 <div id="overlay"></div>
@@ -484,6 +500,27 @@ html, body {
 
      
 <script>
+
+const player = document.getElementById("audio");
+    let skipTimeout;
+
+    // Play a song safely
+    function playSong(file) {
+      player.pause();
+      player.removeAttribute("src");
+      player.load();
+      player.src = file;
+      player.addEventListener("canplay", () => {
+        player.play();
+      }, { once: true });
+    }
+
+    // Skip logic with debounce (prevents rapid clicks from causing lag)
+    function skipSong(file) {
+      clearTimeout(skipTimeout);
+      skipTimeout = setTimeout(() => playSong(file), 200);
+    }
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const btnRadio = document.getElementById("btnRadio");
