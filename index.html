@@ -404,18 +404,18 @@ html, body {
    MOBILE OVERRIDES – CLEAN RESET
    =========================== */
 @media (max-width: 600px) {
-  /* Song title smaller on mobile */
+  /* Shrink text for mobile only */
+  .radio-screen-line1,
   .radio-screen-line2,
-  .radio-screen-line2.mp3-title,
-  .mp3-title {
-    font-size: 14px !important;   /* smaller than desktop */
-    line-height: 1.2 !important;
-    width: 100%;
+  .radio-screen-line2.mp3-title {
+    font-size: 11px !important;   /* smaller than before */
+    line-height: 1.1 !important;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+}
 
   /* Hide volume slider on mobile */
   .vol-slider { display: none !important; }
