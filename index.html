@@ -78,9 +78,10 @@ html, body {
   }
 }
 
-
+/* Extend radio screen width */
 .radio-screen {
-    width: 100%;
+    width: 100%;          /* take full width of player shell */
+    max-width: 520px;     /* adjust if you want even wider */
     background: transparent;
     border-radius: 10px;
     padding: 14px 16px;
@@ -96,14 +97,14 @@ html, body {
 .radio-screen-line2 {
     font-family: "Digital-7 Mono", monospace;
     text-transform: uppercase;
-    letter-spacing: 0.08em; /* slightly wider spacing for clarity */
-    color: #ffd08a; /* your amber */
+    letter-spacing: 0.08em;
+    color: #ffd08a;
     font-size: 16px;
-    font-weight: 800; /* extra bold for vividness */
-    line-height: 16px;
-    height: 16px;
-    overflow: hidden;
-    white-space: nowrap;
+    font-weight: 800;
+    line-height: 20px;
+    min-height: 20px;
+    overflow: visible;    /* don’t clip text */
+    white-space: nowrap;  /* keep one line */
 }
 
 /* MP3 TITLE */
@@ -111,14 +112,33 @@ html, body {
     font-size: 16px;
     line-height: 16px;
     letter-spacing: 0.06em;
-    color: #ffb15a !important; /* your orange */
-    font-weight: 800; /* extra bold */
+    color: #ffb15a !important;
+    font-weight: 800;
+    white-space: nowrap;  /* force one line */
+    overflow: visible;    /* don’t clip text */
+    text-overflow: unset; /* no ellipsis */
+    width: 100%;          /* stretch across container */
+}
+
+
+/* Scrolling variant for long titles */
+.radio-screen-line2.mp3-title.scrolling {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    animation: marquee 12s linear infinite;
 }
 
 /* LIVE RED indicator */
 .live-red {
     color: #ff2600 !important;
     font-weight: 800; /* bold red, no glow */
+}
+
+/* Keyframes for scrolling */
+@keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
 }
 
 
@@ -172,6 +192,8 @@ html, body {
     color: #ffd08a;
     margin-left: 8px;
     opacity: 0.35;
+    position: relative;
+    top: -2px;   /* move upwards slightly */
 }
 
 .led-inputs .active {
@@ -194,6 +216,12 @@ html, body {
 
 #ledVol.playing {
     opacity: 1;
+}
+
+/* MP3 PLAYER line (line1) */
+.radio-screen-line1 {
+    position: relative;
+    top: -6px;   /* nudges MP3 PLAYER text upwards */
 }
 
 /* BACKGROUND */
@@ -506,6 +534,20 @@ html, body {
 
      
 <script>
+
+function applyScrollingCheck() {
+  document.querySelectorAll('.radio-screen-line2.mp3-title').forEach(el => {
+    const containerWidth = el.offsetWidth;
+    const textWidth = el.scrollWidth;
+
+    if (textWidth > containerWidth) {
+      el.classList.add('scrolling');
+    } else {
+      el.classList.remove('scrolling');
+    }
+  });
+}
+
 
 const player = document.getElementById("audio");
     let skipTimeout;
@@ -2090,11 +2132,20 @@ const isNight = (
     applyVolumeToCurrentAudio(parseInt(volSlider.value));
     updateBarAnimation();
 
-   
+   /* ===========================
+   SCROLLING CHECK
+   =========================== */
+document.querySelectorAll('.radio-screen-line2.mp3-title').forEach(el => {
+  const containerWidth = el.offsetWidth;
+  const textWidth = el.scrollWidth;
+
+  if (textWidth > containerWidth) {
+    el.classList.add('scrolling');
+  }
+});
 
 });
 </script>
-
-    
+ 
 </body>
 </html>
