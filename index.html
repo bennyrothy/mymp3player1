@@ -490,7 +490,7 @@ html, body {
         <div id="radioScreenLine2" class="radio-screen-line2"></div>
 
         <div class="led-bottom-row">
-            <span id="ledVol">VOL 50%</span>
+            <span id="ledVol">VOL 100%</span>
         </div>
     </div>
 
@@ -521,7 +521,7 @@ html, body {
 
 <div class="volume-row">
     <button id="volDown" class="vol-btn vol-minus">VOL −</button>
-    <input id="volSlider" type="range" min="0" max="100" value="50" class="vol-slider">
+    <input id="volSlider" type="range" min="0" max="100" value="100" class="vol-slider">
     <button id="volUp" class="vol-btn vol-plus">VOL +</button>
 </div>
 
@@ -2004,26 +2004,36 @@ mp3Prev.addEventListener("click", () => {
         ledVol.textContent = "VOL " + v + "%";
     }
 
-    volSlider.addEventListener("input", () => {
-        let v = parseInt(volSlider.value);
-        v = Math.round(v / 10) * 10;
-        volSlider.value = v;
-        applyVolumeToCurrentAudio(v);
-    });
+    /* ===========================
+   VOLUME
+   =========================== */
 
-    volUp.addEventListener("click", () => {
-        let v = parseInt(volSlider.value);
-        v = Math.min(100, v + 10);
-        volSlider.value = v;
-        applyVolumeToCurrentAudio(v);
-    });
+function applyVolumeToCurrentAudio(v) {
+    const audio = getCurrentAudio();
+    if (audio) audio.volume = v / 100;
+    ledVol.textContent = "VOL " + v + "%";
+}
 
-    volDown.addEventListener("click", () => {
-        let v = parseInt(volSlider.value);
-        v = Math.max(0, v - 10);
-        volSlider.value = v;
-        applyVolumeToCurrentAudio(v);
-    });
+volSlider.addEventListener("input", () => {
+    let v = parseInt(volSlider.value);
+    v = Math.round(v / 20) * 20;
+    volSlider.value = v;
+    applyVolumeToCurrentAudio(v);
+});
+
+volUp.addEventListener("click", () => {
+    let v = parseInt(volSlider.value);
+    v = Math.min(100, v + 20);
+    volSlider.value = v;
+    applyVolumeToCurrentAudio(v);
+});
+
+volDown.addEventListener("click", () => {
+    let v = parseInt(volSlider.value);
+    v = Math.max(0, v - 20);
+    volSlider.value = v;
+    applyVolumeToCurrentAudio(v);
+});
 
     /* ===========================
    BACKGROUND
