@@ -1799,19 +1799,12 @@ function playNextMp3(mode) {
     updateMp3Title(entry.name);
 
     const nextUrl = fixPath(entry.url);
-    // Pre-decode the next track
-    audio.src = nextUrl;
-    audio.preload = "auto";
-    audio.load();
-    audio.currentTime = 0;
+    // Load the next track without deliberately pausing playback
+audio.src = nextUrl;
+audio.preload = "auto";
+audio.load();
 
-    // Warm pipeline
-    const realVolume = volSlider.value / 100;
-    audio.volume = 0;
-    audio.play().catch(() => {});
-    audio.pause();
-    audio.volume = realVolume;
-
+audio.volume = volSlider.value / 100;
     // Preload NEXT and PREV tracks in background
     function preloadAudio(url) {
         if (!url) return;
