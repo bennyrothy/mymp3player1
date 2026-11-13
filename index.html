@@ -1587,6 +1587,7 @@ function updateMp3Title(filename) {
     radioScreenLine2.classList.add("mp3-title");
 }
 
+
 function getNextTrack(mode) {
     ensureShuffle(mode);
     const key = getShuffleKey(mode);
@@ -1604,6 +1605,45 @@ function getNextTrack(mode) {
 
     return state.order[state.index];
 }
+
+
+// Keep separate preloading audio elements for each playlist
+const mp3Preloaders = {};
+
+function preloadNextMp3(mode) {
+    const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
+    const key = getShuffleKey(mode);
+
+    if (!playlist.length) return;
+
+    ensureShuffle(mode);
+
+    const state = shuffleState[key];
+    if (!state.order.length) return;
+
+    // Find the next song without advancing shuffle
+    const nextPosition = state.index === -1
+        ? 0
+        : (state.index + 1) % state.order.length;
+
+    const nextEntry = playlist[state.order[nextPosition]];
+    if (!nextEntry || !nextEntry.url) return;
+
+    const nextUrl = fixPath(nextEntry.url);
+
+    if (!mp3Preloaders[mode]) {
+        mp3Preloaders[mode] = new Audio();
+    }
+
+    const preloader = mp3Preloaders[mode];
+
+    if (preloader.src === new URL(nextUrl, document.baseURI).href) return;
+
+    preloader.preload = "auto";
+    preloader.src = nextUrl;
+    preloader.load();
+}
+
 
 function fixPath(path) {
     return encodeURI(path);
@@ -1780,6 +1820,7 @@ function switchMode(mode) {
        MP3 SWITCHING
        =========================== */
 
+
 function playNextMp3(mode) {
     const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
     const audio = mode === MODE_MP3_1 ? audioMp3_1 : audioMp3_2;
@@ -1794,45 +1835,43 @@ function playNextMp3(mode) {
     }
 
     const nextIndex = getNextTrack(mode);
+    if (nextIndex === null) return;
+
     const entry = playlist[nextIndex];
+    if (!entry) return;
 
     updateMp3Title(entry.name);
 
     const nextUrl = fixPath(entry.url);
-    // Load the next track without deliberately pausing playback
-audio.src = nextUrl;
-audio.preload = "auto";
-audio.load();
 
-audio.volume = volSlider.value / 100;
-    // Preload NEXT and PREV tracks in background
-    function preloadAudio(url) {
-        if (!url) return;
-        const temp = new Audio();
-        temp.src = url;
-        temp.preload = "auto";
-        temp.load();
-    }
-    preloadAudio(fixPath(playlist[nextIndex + 1]?.url));
-    preloadAudio(fixPath(playlist[nextIndex - 1]?.url));
+    // Load the selected song
+    audio.src = nextUrl;
+    audio.preload = "auto";
+    audio.volume = volSlider.value / 100;
+    audio.load();
+
+    // Prepare the following song while this one plays
+    preloadNextMp3(mode);
 
     audio.play()
-    .then(() => {
-        isPlaying = true;
-        updateBarAnimation();
-        ledVol.classList.add("playing");
-        mp3PlayPause.textContent = "⏸";
-        mp3TrackNumber++;
-    })
-    .catch(() => {
-        isPlaying = false;
-        updateBarAnimation();
-        ledVol.classList.remove("playing");
-        mp3PlayPause.textContent = "▶";
-    });
+        .then(() => {
+            isPlaying = true;
+            updateBarAnimation();
+            ledVol.classList.add("playing");
+            mp3PlayPause.textContent = "⏸";
+            mp3TrackNumber++;
+        })
+        .catch((error) => {
+            console.log("MP3 playback error:", error);
 
-    
+            isPlaying = false;
+            updateBarAnimation();
+            ledVol.classList.remove("playing");
+            mp3PlayPause.textContent = "▶";
+        });
 }
+
+
 
 function playPreviousMp3(mode) {
     const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
@@ -1847,7 +1886,6 @@ function playPreviousMp3(mode) {
         return;
     }
 
-    // ⛔ Block Prev on the very first track
     if (isFirstTrack(mode)) {
         return;
     }
@@ -1858,55 +1896,42 @@ function playPreviousMp3(mode) {
     if (!state.order.length) ensureShuffle(mode);
 
     state.index--;
-    if (state.index < 0) state.index = state.order.length - 1;
+    if (state.index < 0) {
+        state.index = state.order.length - 1;
+    }
 
     const prevIndex = state.order[state.index];
     const entry = playlist[prevIndex];
 
+    if (!entry) return;
+
     updateMp3Title(entry.name);
 
-    const prevUrl = fixPath(entry.url);
-
-    // Pre-decode the previous track
-    audio.src = prevUrl;
+    audio.src = fixPath(entry.url);
     audio.preload = "auto";
+    audio.volume = volSlider.value / 100;
     audio.load();
-    audio.currentTime = 0;
 
-    // Warm pipeline
-    const realVolume = volSlider.value / 100;
-    audio.volume = 0;
-    audio.play().catch(() => {});
-    audio.pause();
-    audio.volume = realVolume;
+    // Prepare the next song in the shuffle sequence
+    preloadNextMp3(mode);
 
-    // Preload surrounding tracks
-    function preloadAudio(url) {
-        if (!url) return;
-        const temp = new Audio();
-        temp.src = url;
-        temp.preload = "auto";
-        temp.load();
-    }
-    preloadAudio(fixPath(playlist[prevIndex - 1]?.url));
-    preloadAudio(fixPath(playlist[prevIndex + 1]?.url));
+    audio.play()
+        .then(() => {
+            isPlaying = true;
+            updateBarAnimation();
+            ledVol.classList.add("playing");
+            mp3PlayPause.textContent = "⏸";
+        })
+        .catch((error) => {
+            console.log("MP3 playback error:", error);
 
-    
-        audio.play()
-            .then(() => {
-                isPlaying = true;
-                updateBarAnimation();
-                ledVol.classList.add("playing");
-                mp3PlayPause.textContent = "⏸";
-            })
-            .catch(() => {
-                isPlaying = false;
-                updateBarAnimation();
-                ledVol.classList.remove("playing");
-                mp3PlayPause.textContent = "▶";
-            });
-    
+            isPlaying = false;
+            updateBarAnimation();
+            ledVol.classList.remove("playing");
+            mp3PlayPause.textContent = "▶";
+        });
 }
+
 
 
 
@@ -1979,14 +2004,19 @@ mp3Prev.addEventListener("click", () => {
         mp3PlayPause.textContent = "▶";
     };
 
-    // ⭐ AUTO-SKIP WHEN TRACK ENDS (NO COOLDOWN)
-    audioMp3_1.onended = () => {
+    
+ // AUTO-SKIP WHEN TRACK ENDS
+audioMp3_1.onended = () => {
+    if (currentMode === MODE_MP3_1) {
         playNextMp3(MODE_MP3_1);
-    };
+    }
+};
 
-    audioMp3_2.onended = () => {
+audioMp3_2.onended = () => {
+    if (currentMode === MODE_MP3_2) {
         playNextMp3(MODE_MP3_2);
-    };
+    }
+};
 
     /* ===========================
        VOLUME
