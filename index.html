@@ -526,8 +526,8 @@ html, body {
 </div>
 
 <audio id="audioRadio"></audio>
-<audio id="audioMp3_1"></audio>
-<audio id="audioMp3_2"></audio>
+<audio id="audioMp3_1" preload="auto" playsinline></audio>
+<audio id="audioMp3_2" preload="auto" playsinline></audio>
 
 </div> <!-- END OF PLAYER SHELL -->
 
@@ -1583,6 +1583,8 @@ function updateMp3Title(filename) {
         return;
     }
 
+
+
     let clean = filename.replace(/\.mp3$/i, "");
     clean = clean.replace(/^.*?\//, "");
 
@@ -1593,6 +1595,18 @@ function updateMp3Title(filename) {
 
     radioScreenLine2.textContent = clean;
     radioScreenLine2.classList.add("mp3-title");
+}
+
+// Update mobile lock-screen media information
+function updateMobileMediaSession(filename) {
+    if (!("mediaSession" in navigator)) return;
+    if (!("MediaMetadata" in window)) return;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: filename.replace(/\.mp3$/i, ""),
+        artist: "Sony Style MP3 Player",
+        album: "MP3 Player"
+    });
 }
 
 
@@ -1618,7 +1632,14 @@ function getNextTrack(mode) {
 // Keep separate preloading audio elements for each playlist
 const mp3Preloaders = {};
 
+// Detect mobile devices without changing desktop behaviour
+const isMobilePlayback = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 function preloadNextMp3(mode) {
+
+    // Avoid competing audio downloads on mobile devices
+    if (isMobilePlayback) return;
+
     const playlist = mode === MODE_MP3_1 ? playlist1 : playlist2;
     const key = getShuffleKey(mode);
 
@@ -1849,6 +1870,7 @@ function playNextMp3(mode) {
     if (!entry) return;
 
     updateMp3Title(entry.name);
+updateMobileMediaSession(entry.name);
 
     const nextUrl = fixPath(entry.url);
 
@@ -1909,16 +1931,17 @@ function playPreviousMp3(mode) {
     }
 
     const prevIndex = state.order[state.index];
-    const entry = playlist[prevIndex];
+const entry = playlist[prevIndex];
 
-    if (!entry) return;
+if (!entry) return;
 
-    updateMp3Title(entry.name);
+updateMp3Title(entry.name);
+updateMobileMediaSession(entry.name);
 
-    audio.src = fixPath(entry.url);
-    audio.preload = "auto";
-    audio.volume = volSlider.value / 100;
-    audio.load();
+audio.src = fixPath(entry.url);
+audio.preload = "auto";
+audio.volume = volSlider.value / 100;
+audio.load();
 
     // Prepare the next song in the shuffle sequence
     preloadNextMp3(mode);
